@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body>
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var start = performance.now();
+            var painter = ctx.beginDraw();
+            ctx.beginPath();
+            ctx.lineWidth = 10;
+            ctx.moveTo(100, 100);
+            // for (var i = 0; i < 1000; i++) {
+            //     var x = Math.random() * 1000;
+            //     var y = Math.random() * 600;
+            //     ctx.quadraticCurveTo(x + Math.random() * 10, y + Math.random() * 10, x, y);
+            // }
+            ctx.lineTo(200, 150);
+            ctx.lineTo(300, 100);
+            ctx.quadraticCurveTo(400, 150, 300, 200);
+            ctx.stroke();
+            ctx.endDraw();
+            console.log(performance.now() - start);
+        });
+    </script>
+</body>
+</html>

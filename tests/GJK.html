@@ -1,0 +1,95 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body style="margin:0px">
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = canvas.getContext('2d');
+
+            var p1 = [241.972, 472.629, 299.52, 472.629, 346.174, 430.225, 346.174, 377.90600000000006];
+            var p2 = [346.174, 377.90600000000006, 346.174, 325.59900000000005, 299.519, 283.19100000000003, 241.972, 283.19100000000003]
+
+            var GJK = new qtek2d.context.tool.GJK();
+
+            function draw(p, intersect) {
+                ctx.lineWidth = 5;
+                ctx.globalAlpha = 0.5;
+                ctx.fillStyle = intersect ? 'red' : 'green';
+
+                ctx.beginPath();
+                ctx.moveTo(p[0], p[1]);
+                for (var i = 0; i < p.length;) {
+                    ctx.lineTo(p[i++], p[i++]);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.fill(); 
+            }
+
+            var intersect = GJK.intersect(p1, p2);
+            draw(p1, intersect);
+            draw(p2, intersect);
+
+            document.onkeydown = function(e) {
+                var _speed = 10;
+                switch(e.keyCode) {
+                    case 87: //w
+                        for (var i = 1; i < p1.length; i += 2) {
+                            p1[i] -= _speed;
+                        }
+                        break;
+                    case 83: //s
+                        for (var i = 1; i < p1.length; i += 2) {
+                            p1[i] += _speed;
+                        }
+                        break;
+                    case 65: //a
+                        for (var i = 0; i < p1.length; i += 2) {
+                            p1[i] -= _speed;
+                        }
+                        break;
+                    case 68: //d
+                        for (var i = 0; i < p1.length; i += 2) {
+                            p1[i] += _speed;
+                        }
+                        break;
+                    case 38: //up arrow
+                        for (var i = 1; i < p1.length; i += 2) {
+                            p2[i] -= _speed;
+                        }
+                        break;
+                    case 40: //down arrow
+                        for (var i = 1; i < p2.length; i += 2) {
+                            p2[i] += _speed;
+                        }
+                        break;
+                    case 37: //left arrow
+                        for (var i = 0; i < p2.length; i += 2) {
+                            p2[i] -= _speed;
+                        }
+                        break;
+                    case 39: //right arrow
+                        for (var i = 0; i < p2.length; i += 2) {
+                            p2[i] += _speed;
+                        }
+                        break;
+                }
+                var intersect = GJK.intersect(p1, p2);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                draw(p1, intersect);
+                draw(p2, intersect);
+            }
+        });
+    </script>
+</body>
+</html>

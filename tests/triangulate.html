@@ -1,0 +1,66 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="../lib/poly2tri.js"></script>
+        <script type="text/javascript" src="../lib/polyk.js"></script>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var contour = [];
+
+            var pointList = [];
+            var x = 500, y = 500; r0 = 200, r = 300, n = 100;
+            
+            var dStep = Math.PI / n;
+            var deg = -Math.PI / 2;
+            var xStart = x + r * Math.cos(deg);
+            var yStart = y + r * Math.sin(deg);
+            deg += dStep;
+
+            // 记录边界点，用于判断inside
+            var pointList = [];
+            pointList.push(xStart, yStart);
+            contour.push(new poly2tri.Point(xStart, yStart));
+            for (var i = 0, end = n * 2 - 1, ri; i < end; i ++) {
+                ri = i % 2 === 0 ? r0 : r;
+                var xi = x + ri * Math.cos(deg);
+                var yi = y + ri * Math.sin(deg);
+                pointList.push(xi, yi);
+                contour.unshift(new poly2tri.Point(xi, yi));
+                deg += dStep;
+            }
+
+            var contour2 = new Float32Array(pointList);
+
+            // Invserse
+            var n = contour2.length / 2;
+            for (var i = 0; i < Math.floor(n / 2); i++) {
+                var tmp = contour2[i * 2];
+                contour2[i * 2] = contour2[(n - i - 1) * 2];
+                contour2[(n - i - 1) * 2] = tmp;
+
+                var tmp = contour2[i * 2 + 1];
+                contour2[i * 2 + 1] = contour2[(n - i - 1) * 2 + 1];
+                contour2[(n - i - 1) * 2 + 1] = tmp;
+            }
+
+            var swctx = new poly2tri.SweepContext(contour);
+            var start = performance.now();
+            // console.profile('triangulate')
+            swctx.triangulate();
+            // console.profileEnd('triangulate')
+            var end = performance.now();
+            console.log(end - start);
+
+            setTimeout(function () {
+                
+                var start = performance.now();
+                for (var i = 0; i < 1000; i++) {
+                    PolyK.Triangulate(contour2);
+                }
+                var end = performance.now();
+                console.log(end - start);
+            }, 1000)
+        </script>
+    </body>
+</html>

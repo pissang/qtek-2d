@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body>
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var image = new Image();
+            image.src = 'assets/avatar_2.png';
+
+            image.onload = function() {
+                var start = performance.now();
+                console.profile('render')
+                var painter = ctx.beginDraw();
+                for (var i = 0; i < 100; i++) {
+                    ctx.drawImage(image, Math.random() * 1000, Math.random() * 600, 50, 50);
+                    ctx.beginPath();
+                    ctx.lineWidth = 10;
+                    ctx.moveTo(Math.random() * 1000, Math.random() * 600);
+                    ctx.lineTo(Math.random() * 1000, Math.random() * 600);
+                    ctx.stroke();
+                }
+
+                ctx.endDraw();
+                console.profileEnd('render')
+                console.log(performance.now() - start);
+            }
+        });
+    </script>
+</body>
+</html>

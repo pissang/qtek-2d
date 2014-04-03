@@ -1,0 +1,41 @@
+@export buildin.2d.image.vertex
+
+attribute vec3 position;
+attribute vec2 texcoord;
+attribute vec3 t0;
+attribute vec3 t1;
+
+uniform mat4 worldViewProjection : WORLDVIEWPROJECTION;
+
+varying vec2 v_Uv;
+
+void main()
+{
+    mat3 localTransform = mat3(
+        t0.x, t1.x, 0.0,
+        t0.y, t1.y, 0.0,
+        t0.z, t1.z, 1.0
+    );
+    vec3 pos2d = vec3(position.xy, 1.0);
+    pos2d = localTransform * pos2d;
+    vec4 pos3d = vec4(pos2d.xy, position.z, 1.0);
+
+    gl_Position = worldViewProjection * pos3d;
+    v_Uv = texcoord;
+}
+
+@end
+
+
+@export buildin.2d.image.fragment
+
+uniform sampler2D sprite;
+
+varying vec2 v_Uv;
+
+void main()
+{
+    gl_FragColor = texture2D(sprite, v_Uv);
+}
+
+@end

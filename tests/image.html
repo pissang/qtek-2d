@@ -1,0 +1,53 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body>
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var image = new Image();
+            image.src = 'assets/avatar_2.png';
+
+            var animation = new qtek.animation.Animation();
+            animation.start();
+
+            image.onload = function() {
+                var start = performance.now();
+                var painter = ctx.beginDraw();
+                var images = [];
+                for (var i = 0; i < 10000; i++) {
+                    images.push(
+                        ctx.drawImage(image, Math.random() * 1000, Math.random() * 600, 50, 50)
+                    );
+                }
+
+                ctx.endDraw();
+                console.log(performance.now() - start);
+                // painter.disableBlending();
+                animation.on('frame', function(dTime) {
+                    console.log(dTime);
+                    ctx.clear();
+                    painter.begin();
+                    for (var i = 0; i < images.length; i++) {
+                        painter.addElement(images[i]);
+                    }
+                    painter.end();
+                    painter.draw(ctx);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

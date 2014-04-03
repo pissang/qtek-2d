@@ -1,0 +1,96 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body style="margin:0px">
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            
+            var pointList = [];
+            var x = 400, y = 400; r0 = 290, r = 300, n = 100;
+            
+            var dStep = Math.PI / n;
+            var deg = -Math.PI / 2;
+            var xStart = x + r * Math.cos(deg);
+            var yStart = y + r * Math.sin(deg);
+            deg += dStep;
+
+            var pointList = [];
+            pointList.push(xStart, yStart);
+            for (var i = 0, end = n * 2 - 1, ri; i < end; i ++) {
+                ri = i % 2 === 0 ? r0 : r;
+                pointList.push(x + ri * Math.cos(deg), y + ri * Math.sin(deg));
+                deg += dStep;
+            }
+
+            var contour = new Float32Array(pointList);
+
+            // Invserse
+            var n = contour.length / 2;
+            for (var i = 0; i < Math.floor(n / 2); i++) {
+                var tmp = contour[i * 2];
+                contour[i * 2] = contour[(n - i - 1) * 2];
+                contour[(n - i - 1) * 2] = tmp;
+
+                var tmp = contour[i * 2 + 1];
+                contour[i * 2 + 1] = contour[(n - i - 1) * 2 + 1];
+                contour[(n - i - 1) * 2 + 1] = tmp;
+            }
+
+            var triangulation = new qtek2d.context.tool.Triangulation();
+            var start = performance.now();
+            // console.profile('triangulation')
+            for (var i = 0; i < 1000; i++) {
+                triangulation.triangulate(contour);
+            }
+            // console.profileEnd('triangulation')
+            var end = performance.now();
+            console.log(end - start);
+
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = canvas.getContext('2d');
+            var triangles = triangulation.triangles;
+            var monoPolygons = triangulation._monoPolygons;
+            for (var i = 0; i < monoPolygons.length; i++) {
+                var poly = monoPolygons[i];
+                ctx.fillStyle = 'rgb(' + [
+                    Math.floor(Math.random() * 125 + 125),
+                    Math.floor(Math.random() * 125 + 125),
+                    Math.floor(Math.random() * 125 + 125)
+                ].join(',') + ')';
+    
+                ctx.beginPath();
+                var idx = poly[0] * 2;
+                ctx.moveTo(contour[idx], contour[idx + 1]);
+                for (var j = 1; j < poly.length; j++) {
+                    idx = poly[j] * 2;
+                    ctx.lineTo(contour[idx], contour[idx + 1]);
+                }
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            for (var i = 0; i < triangles.length / 3; i++) {
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                var p0 = triangles[i * 3];
+                var p1 = triangles[i * 3 + 1];
+                var p2 = triangles[i * 3 + 2];
+                ctx.moveTo(contour[p0 * 2], contour[p0 * 2 + 1]);
+                ctx.lineTo(contour[p1 * 2], contour[p1 * 2 + 1]);
+                ctx.lineTo(contour[p2 * 2], contour[p2 * 2 + 1]);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+        });
+    </script>
+</body>
+</html>

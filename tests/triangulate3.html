@@ -1,0 +1,115 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body style="margin:0px">
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            
+            var pointList = [];
+            var x = 400, y = 400; r0 = 200, r = 300, n = 500;
+            
+            var dStep = Math.PI / n;
+            var deg = -Math.PI / 2;
+            var xStart = x + r * Math.cos(deg);
+            var yStart = y + r * Math.sin(deg);
+            deg += dStep;
+
+            var pointList = [];
+            pointList.push(xStart, yStart);
+            for (var i = 0, end = n * 2 - 1, ri; i < end; i ++) {
+                ri = i % 2 === 0 ? r0 : r;
+                pointList.push(x + ri * Math.cos(deg), y + ri * Math.sin(deg));
+                deg += dStep;
+            }
+
+            var contour = new Float32Array(pointList);
+
+            // Invserse
+            var n = contour.length / 2;
+            for (var i = 0; i < Math.floor(n / 2); i++) {
+                var tmp = contour[i * 2];
+                contour[i * 2] = contour[(n - i - 1) * 2];
+                contour[(n - i - 1) * 2] = tmp;
+
+                var tmp = contour[i * 2 + 1];
+                contour[i * 2 + 1] = contour[(n - i - 1) * 2 + 1];
+                contour[(n - i - 1) * 2 + 1] = tmp;
+            }
+
+            var triangulation = new qtek2d.context.tool.Triangulation2();
+            var start = performance.now();
+            // console.profile('triangulation')
+            for (var i = 0; i < 100; i++) {
+                triangulation.triangulate(contour);
+            }
+            // console.profileEnd('triangulation')
+            var end = performance.now();
+            console.log(end - start);
+
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = canvas.getContext('2d');
+            var triangles = triangulation.triangles;
+
+            var gridWidth = triangulation._gridWidth;
+            var gridHeight = triangulation._gridHeight;
+            var nGrid = triangulation._gridNumber;
+            var bb = triangulation._boundingBox;
+            var grids = triangulation._grids;
+            // for (var i = 0; i < nGrid; i++) {
+            //     var y0 = i * gridHeight + bb[0][1];
+            //     var y1 = (i + 1) * gridHeight + bb[0][1];
+            //     for (var j = 0; j < nGrid; j++) {
+            //         // Draw debug grids
+            //         ctx.fillStyle = 'rgb(' + [Math.round(i / nGrid * 255), Math.round(j / nGrid * 255), 0].join(',') + ')';
+            //         ctx.globalAlpha = 0.5;
+            //         var x0 = j * gridWidth + bb[0][0];
+            //         var x1 = (j + 1) * gridWidth + bb[0][0];
+
+            //         ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+            //         ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+
+            //         // Draw points in grid
+            //         var gridIdx = i * nGrid + j;
+            //         var gridPoints = grids[gridIdx];
+            //         for (var k = 0; k < gridPoints.length; k++) {
+            //             var idx = gridPoints[k];
+            //             var xi = contour[idx * 2];
+            //             var yi = contour[idx * 2 + 1];
+
+            //             ctx.globalAlpha = 0.5;
+            //             ctx.beginPath();
+            //             ctx.arc(xi, yi, 5, 0, 2 * Math.PI);
+            //             ctx.fill();
+            //             // ctx.stroke();
+            //         }
+            //     }
+            // }
+
+
+            // Draw Debug Triangles
+            ctx.globalAlpha = 1.0;
+            for (var i = 0; i < triangles.length / 3; i++) {
+                ctx.beginPath();
+                var p0 = triangles[i * 3];
+                var p1 = triangles[i * 3 + 1];
+                var p2 = triangles[i * 3 + 2];
+                ctx.moveTo(contour[p0 * 2], contour[p0 * 2 + 1]);
+                ctx.lineTo(contour[p1 * 2], contour[p1 * 2 + 1]);
+                ctx.lineTo(contour[p2 * 2], contour[p2 * 2 + 1]);
+                ctx.closePath();
+                ctx.stroke();
+            }
+
+
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body style="margin:0px">
+    <div style="left: 10px; top : 10px; position:absolute;" id="fps"></div>
+    <canvas id="main" style="background-color:grey"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d) {
+
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+
+            var painter = ctx.beginDraw();
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.moveTo(100, 300);
+            ctx.bezierCurveTo(100, 100, 280, 250, 300, 300);
+            ctx.fill();
+            ctx.closePath();
+
+            // ctx.beginPath();
+            // ctx.moveTo(100, 100);
+            // ctx.quadraticCurveTo(150, 150, 200, 100);
+            // ctx.closePath();
+
+            ctx.endDraw();
+        });
+    </script>
+</body>
+</html>

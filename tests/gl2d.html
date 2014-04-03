@@ -1,0 +1,86 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body style="margin:0px">
+    <div style="left: 10px; top : 10px; position:absolute;" id="fps"></div>
+    <canvas id="main" style="background-color:grey"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            
+            var points = [];
+            var r0 = 200, r = 300, n = 500;
+            
+            var dStep = Math.PI / n;
+            var deg = -Math.PI / 2;
+            var xStart = r * Math.cos(deg);
+            var yStart = r * Math.sin(deg);
+            deg += dStep;
+
+            var points = [];
+            points.push([xStart, yStart]);
+            for (var i = 0, end = n * 2 - 1, ri; i < end; i ++) {
+                ri = i % 2 === 0 ? r0 : r;
+                points.push([ri * Math.cos(deg), ri * Math.sin(deg)]);
+                deg += dStep;
+            }
+
+
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var painter;
+            var canvas = document.createElement('canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            var ctx2 = canvas.getContext('2d');
+
+            var rotation = 0;
+            setInterval(function() {
+                ctx.clear([0, 0, 0, 0]);
+                var start = performance.now();
+                qtek.Mesh.beforeFrame();
+                if (!painter) {
+                    painter = ctx.beginDraw();
+                } else {
+                    ctx.beginDraw(painter);
+                }
+                ctx.identity();
+                ctx.fillStyle = 'rgb(10, 200, 160)';
+                ctx.rotate(rotation);
+                ctx.translate(300, 300);
+                rotation += 0.1;
+                path = ctx.beginPath();
+                ctx.moveTo(points[0][0], points[0][1]);
+                for (var i = 1; i < points.length; i++) {
+                    ctx.lineTo(points[i][0], points[i][1]);
+                }
+                ctx.fill();
+                ctx.endPath();
+                ctx.endDraw();
+                var time1 = performance.now() - start;
+
+                var start = performance.now();
+                ctx2.beginPath();
+                ctx2.moveTo(points[0][0], points[0][1]);
+                for (var i = 1; i < points.length; i++) {
+                    ctx2.lineTo(points[i][0], points[i][1]);
+                }
+                ctx2.fill();
+                var time2 = performance.now() - start;
+
+                document.getElementById('fps').innerHTML = [time1, time2].join('<br />');
+            }, 200);
+
+            document.body.appendChild(canvas);
+        });
+    </script>
+</body>
+</html>
