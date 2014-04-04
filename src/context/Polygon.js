@@ -109,8 +109,21 @@ define(function (require) {
         //     this.points.length = this._nPoints * 2;
             
         // } else {
+        // 
+        if (this._nPoints < 3) {
+            return;
+        } else if (this._nPoints == 3) {
+            this.triangles[0] = 0;
+            this.triangles[1] = 1;
+            this.triangles[2] = 2;
+            this.triangles.length = 3;
+        } else {
             triangulation.triangles = this.triangles;
-            triangulation.triangulate(this.points);   
+            triangulation.triangulate(this.points);
+
+            this.points = triangulation.points;
+            this._nPoints = this.points.length / 2; 
+        }
         // }
     }
 

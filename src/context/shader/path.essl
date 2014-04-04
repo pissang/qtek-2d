@@ -39,24 +39,26 @@ varying vec3 v_klm;
 
 void main()
 {
-    // Gradients
-    vec3 px = dFdx(v_klm);
-    vec3 py = dFdy(v_klm);
-    // Chain rule
-    float k2 = v_klm.x * v_klm.x;
-    float c = k2 * v_klm.x - v_klm.y * v_klm.z;
-    float k23 = 3.0 * k2;
-    float cx = k23 * px.x - v_klm.z * px.y - v_klm.y * px.z;
-    float cy = k23 * py.x - v_klm.z * py.y - v_klm.y * py.z;
-    // Signed distance
-    float sd = c / sqrt(cx * cx + cy * cy);
-    
-    // float alpha = clamp(sd + 0.5, 0.0, 1.0);
-    float alpha = clamp(0.5 - sd, 0.0, 1.0);
+    #ifdef ANTIALIASING
+        // Gradients
+        vec3 px = dFdx(v_klm);
+        vec3 py = dFdy(v_klm);
+        // Chain rule
+        float k2 = v_klm.x * v_klm.x;
+        float c = k2 * v_klm.x - v_klm.y * v_klm.z;
+        float k23 = 3.0 * k2;
+        float cx = k23 * px.x - v_klm.z * px.y - v_klm.y * px.z;
+        float cy = k23 * py.x - v_klm.z * py.y - v_klm.y * py.z;
+        // Signed distance
+        float sd = c / sqrt(cx * cx + cy * cy);
 
-    // float alpha = step(v_klm.x * v_klm.x * v_klm.x, v_klm.y * v_klm.z);
+        float alpha = clamp(0.5 - sd, 0.0, 1.0);
+    #else
+        float alpha = step(v_klm.x * v_klm.x * v_klm.x, v_klm.y * v_klm.z);
+    #endif
 
-    gl_FragColor = v_Color * alpha;
+    gl_FragColor = v_Color;
+    gl_FragColor.a *= alpha;
 }
 
 @end

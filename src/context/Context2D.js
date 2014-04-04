@@ -64,7 +64,7 @@ define(function(require) {
             this.camera.update(true);
         }
 
-        this._transform = new Matrix2d();
+        this.currentTransform = new Matrix2d();
 
         this._statesStack = [];
 
@@ -122,22 +122,22 @@ define(function(require) {
         scale : function(x, y) {
             tmpV2[0] = x;
             tmpV2[1] = y;
-            var m = this._transform._array;
+            var m = this.currentTransform._array;
             mat2d.scale(m, m, tmpV2);
         },
         rotate : function(radius) {
-            var m = this._transform._array;
+            var m = this.currentTransform._array;
             mat2d.rotate(m, m, radius);
         },
         translate : function(x, y) {
             tmpV2[0] = x;
             tmpV2[1] = y;
-            var m = this._transform._array;
+            var m = this.currentTransform._array;
             mat2d.translate(m, m, tmpV2);
         },
 
         transform : function(aa, ab, ac, ad, atx, aty) {
-            var m = this._transform._array;
+            var m = this.currentTransform._array;
             var ba = m[0], bb = m[1], bc = m[2], bd = m[3],
                 btx = m[4], bty = m[5];
             m[0] = aa*ba + ab*bc;
@@ -149,7 +149,7 @@ define(function(require) {
         },
 
         setTransform : function(aa, ab, ac, ad, atx, aty) {
-            var m = this._transform._array;
+            var m = this.currentTransform._array;
             m[0] = aa;
             m[1] = ab;
             m[2] = ac;
@@ -347,7 +347,7 @@ define(function(require) {
             return this._depth;
         },
         identity : function() {
-            mat2d.identity(this._transform._array);
+            mat2d.identity(this.currentTransform._array);
         }
     });
 

@@ -138,14 +138,19 @@ define(function(require) {
             bb[1][0] += 0.1;
             bb[1][1] += 0.1;
 
-            var isConvex = mathTool.isTriangleConvex(x0, y0, x1, y1, x2, y2);
-            this._pointTypes[i] = isConvex ? VERTEX_TYPE_CONVEX : VERTEX_TYPE_REFLEX;
-            if (isConvex) {
-                this._candidates.push(i);
+            var area = mathTool.triangleArea(x0, y0, x1, y1, x2, y2);
+            if (Math.abs(area) < 1) {
+                // Ignore tiny triangles, remove the point i
+                this.points.splice(i * 2, 2);
+                n --;
+            } else {
+                this._pointTypes[i] = area < 0 ? VERTEX_TYPE_CONVEX : VERTEX_TYPE_REFLEX;
+                if (area < 0) {
+                    this._candidates.push(i);
+                }
+                j = i;
+                i++;
             }
-
-            j = i;
-            i++;
         }
 
         this._pointTypes.length = n;
@@ -218,6 +223,11 @@ define(function(require) {
         var x2 = this.points[p2 * 2];
         var y2 = this.points[p2 * 2 + 1];
 
+        // Clipped the tiny triangles directly
+        if (Math.abs(mathTool.triangleArea(x0, y0, x1, y1, x2, y2)) < 1) {
+            return true;
+        }
+
         var range = this._getTriangleGrids(x0, y0, x1, y1, x2, y2);
 
         // Find all the points in the grids covered by the triangle
@@ -256,7 +266,7 @@ define(function(require) {
 
         var e0i = this._edgeIn[e0.p0];
         var e1o = this._edgeOut[e1.p1];
-        // Clipping result in new candidate (convex vertex)
+        // New candidate after clipping (convex vertex)
         if (this._pointTypes[e0.p0] == VERTEX_TYPE_REFLEX) {
             if (this.isTriangleConvex2(e0i.p0, e0.p0, e1.p1)) {
                 // PENDING
@@ -337,13 +347,17 @@ define(function(require) {
     })();
 
     TriangulationContext.prototype.isTriangleConvex2 = function(p0, p1, p2) {
+        return this.triangleArea(p0, p1, p2) < 0;
+    }
+
+    TriangulationContext.prototype.triangleArea = function(p0, p1, p2) {
         var x0 = this.points[p0 * 2];
         var y0 = this.points[p0 * 2 + 1];
         var x1 = this.points[p1 * 2];
         var y1 = this.points[p1 * 2 + 1];
         var x2 = this.points[p2 * 2];
         var y2 = this.points[p2 * 2 + 1];
-        return (x1 - x0) * (y2 - y1) - (y1 - y0) * (x2 - x1) < 0;
+        return (x1 - x0) * (y2 - y1) - (y1 - y0) * (x2 - x1);
     }
 
 

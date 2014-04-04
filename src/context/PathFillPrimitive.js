@@ -16,6 +16,7 @@ define(function(require) {
         vertex : Shader.source('buildin.2d.path.fill.vertex'),
         fragment : Shader.source('buildin.2d.path.fill.fragment')
     });
+    pathShader.define('fragment', 'ANTIALIASING');
 
     var PathFillPrimitive = Primitive.derive(function() {
         return {
@@ -71,16 +72,39 @@ define(function(require) {
 
             var offset3 = 0;
             var offset4 = 0;
+
+            var t0Arr = geo.attributes.t0.value;
+            var t1Arr = geo.attributes.t1.value;
+            var colorArr = geo.attributes.color.value;
+
             for (var i = 0; i < this._paths.length; i++) {
-                var data = this._paths[i].getFillVertices();
+                var path = this._paths[i];
+                var nPathVertices = path.getFillVertexNumber();
+                var mat = path.transform._array;
+                var color = path.drawingStyle.fillStyle;
+                var alpha = path.drawingStyle.globalAlpha;
+
+                var data = path.getFillVertices();
                 geo.attributes.position.value.set(data.position, offset3);
-                geo.attributes.color.value.set(data.color, offset4);
-                geo.attributes.t0.value.set(data.t0, offset3);
-                geo.attributes.t1.value.set(data.t1, offset3);
                 geo.attributes.coord.value.set(data.coord, offset3);
 
-                offset3 += data.position.length;
-                offset4 += data.color.length;
+                for (var k = 0; k < nPathVertices; k++) {
+                    // Set t0
+                    t0Arr[offset3] = mat[0];
+                    t0Arr[offset3 + 1] = mat[2];
+                    t0Arr[offset3 + 2] = mat[4];
+                    // Set t1
+                    t1Arr[offset3] = mat[1];
+                    t1Arr[offset3 + 1] = mat[3];
+                    t1Arr[offset3 + 2] = mat[5];
+                    // Set fill style
+                    colorArr[offset4++] = color[0];
+                    colorArr[offset4++] = color[1];
+                    colorArr[offset4++] = color[2];
+                    colorArr[offset4++] = color[3] * alpha;
+
+                    offset3 += 3;
+                }
             }
 
             geo.dirty();

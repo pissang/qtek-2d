@@ -70,6 +70,9 @@ define(function(require) {
             var offset3 = 0;
             var offset2 = 0;
 
+            var t0Arr = geo.attributes.t0.value;
+            var t1Arr = geo.attributes.t1.value;
+
             // Sort images from near to far, reduce pixel to draw
             // TODO
             // If image is transparent and overlapped, the result will wrong, many pixels that should be
@@ -77,14 +80,25 @@ define(function(require) {
             // this._images.sort(this._sortFunc);
 
             for (var i = 0; i < this._images.length; i++) {
-                var data = this._images[i].getVertices();
+                var image = this._images[i];
+                var mat = image.transform._array;
+                var data = image.getVertices();
                 geo.attributes.position.value.set(data.position, offset3);
                 geo.attributes.texcoord.value.set(data.texcoord, offset2);
-                geo.attributes.t0.value.set(data.t0, offset3);
-                geo.attributes.t1.value.set(data.t1, offset3);
 
-                offset3 += data.position.length;
-                offset2 += data.texcoord.length;
+                for (var k = 0; k < 6; k++) {
+                    // Set t0
+                    t0Arr[offset3] = mat[0];
+                    t0Arr[offset3 + 1] = mat[2];
+                    t0Arr[offset3 + 2] = mat[4];
+                    // Set t1
+                    t1Arr[offset3] = mat[1];
+                    t1Arr[offset3 + 1] = mat[3];
+                    t1Arr[offset3 + 2] = mat[5];
+
+                    offset3 += 3;
+                    offset2 += 2;
+                }
             }
 
             geo.dirty();

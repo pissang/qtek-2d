@@ -30,7 +30,6 @@ define( function(require){
 			"GJK": require('qtek/2d/context/tool/GJK'),
 			"LinkedList": require('qtek/2d/context/tool/LinkedList'),
 			"SplayTree": require('qtek/2d/context/tool/SplayTree'),
-			"Triangulation": require('qtek/2d/context/tool/Triangulation'),
 			"Triangulation2": require('qtek/2d/context/tool/Triangulation2'),
 			"color": require('qtek/2d/context/tool/color'),
 			"math": require('qtek/2d/context/tool/math')

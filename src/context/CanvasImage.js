@@ -73,7 +73,7 @@ define(function(require) {
 
     CanvasImage.prototype.end = function(ctx) {
         this.depth = ctx.requestDepthChannel();
-        Matrix2d.copy(this.transform, ctx._transform);
+        Matrix2d.copy(this.transform, ctx.currentTransform);
 
         this.updateVertices();
     }
@@ -103,18 +103,13 @@ define(function(require) {
         if (!this._verticesData) {
             this._verticesData = {
                 position : new Float32Array(18),
-                texcoord : new Float32Array(12),
-                t0 : new Float32Array(18),
-                t1 : new Float32Array(18)
+                texcoord : new Float32Array(12)
             }
         }
 
         var positionArr = this._verticesData.position;
         var texcoordArr = this._verticesData.texcoord;
-        var t0Arr = this._verticesData.t0;
-        var t1Arr = this._verticesData.t1;
 
-        var mat = this.transform._array;
         var z = this.depth;
 
         var offset3 = 0;
@@ -128,15 +123,7 @@ define(function(require) {
             // Set texcoord
             texcoordArr[offset2] = this.quadTexcoords[idx][0];
             texcoordArr[offset2 + 1] = this.quadTexcoords[idx][1];
-            // Set t0
-            t0Arr[offset3] = mat[0];
-            t0Arr[offset3 + 1] = mat[2];
-            t0Arr[offset3 + 2] = mat[4];
-            // Set t1
-            t1Arr[offset3] = mat[1];
-            t1Arr[offset3 + 1] = mat[3];
-            t1Arr[offset3 + 2] = mat[5];
-
+            
             offset3 += 3;
             offset2 += 2;
         }

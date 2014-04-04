@@ -20,7 +20,7 @@ define(function (require) {
 
             ctx.lineWidth = this.lineWidth;
 
-            mat2d.copy(ctx._transform._array, this._matrix);
+            mat2d.copy(ctx.currentTransform._array, this._matrix);
         },
 
         save : function(ctx) {
@@ -31,7 +31,7 @@ define(function (require) {
 
             this.lineWidth = ctx.lineWidth;
 
-            mat2d.copy(this._matrix, ctx._transform._array);
+            mat2d.copy(this._matrix, ctx.currentTransform._array);
         }
     }
 

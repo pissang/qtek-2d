@@ -113,18 +113,16 @@ define(function(require) {
                 anticlockwise = false;
             }
             // Add a connect line between current point to start point of circle
-            var x0 = Math.cos(startAngle);
-            var y0 = Math.sin(startAngle);
-            var sx = x + r * x0;
-            var sy = y + r * y0;
+            var x0 = x + r * Math.cos(startAngle);
+            var y0 = y + r * Math.sin(startAngle);
             if (!this._subpath) {
-                this._subpath = this._beginSubpath(sx, sy);
-                this._xi = sx;
-                this._yi = sy;
+                this._subpath = this._beginSubpath(x0, y0);
+                this._xi = x0;
+                this._yi = y0;
             }
 
-            if (!(mathTool.approxEqualInt(sx, this._xi) && mathTool.approxEqualInt(sy, this._yi))) {
-                this._subpath.addLine(this._xi, this._yi, sx, sy, thickness);
+            if (!(mathTool.approxEqualInt(x0, this._xi) && mathTool.approxEqualInt(y0, this._yi))) {
+                this._subpath.addLine(this._xi, this._yi, x0, y0, thickness);
             }
             if (mathTool.approxEqual(startAngle, endAngle)) {
                 return;
@@ -162,8 +160,6 @@ define(function(require) {
 
             var start = startAngle;
             var end, x1, y1, x2, y2, x3, y3;
-            // tangent x, y
-            var tx, ty;
             var tanPhi;
             var k = 0.5522847498;
             for (var i = 0; i < nSeg; i++) {
@@ -179,31 +175,24 @@ define(function(require) {
                         gap = end - start;
                     }
                 }
-                x3 = Math.cos(end);
-                y3 = Math.sin(end);
+                x3 = x + r * Math.cos(end);
+                y3 = y + r * Math.sin(end);
 
                 tanPhi = Math.tan(gap / 2);
-                x1 = x0 - k * y0 * tanPhi;
-                y1 = y0 + k * x0 * tanPhi;
-                x2 = x3 + k * y3 * tanPhi;
-                y2 = y3 - k * x3 * tanPhi;
+                x1 = x0 - k * (y0 - y) * tanPhi;
+                y1 = y0 + k * (x0 - x) * tanPhi;
+                x2 = x3 + k * (y3 - y) * tanPhi;
+                y2 = y3 - k * (x3 - x) * tanPhi;
 
-                this._subpath.addCubicBezierCurve(
-                    x0 * r + x, y0 * r + y,
-                    x1 * r + x, y1 * r + y,
-                    x2 * r + x, y2 * r + y,
-                    x3 * r + x, y3 * r + y,
-                    thickness
-                );
-                // this._subpath.addLine(x0 * r + x, y0 * r + y, x3 * r + x, y3 * r + y, thickness);
-
+                this._subpath.addCubicBezierCurve(x0, y0, x1, y1, x2, y2, x3, y3, thickness);
+                
                 x0 = x3;
                 y0 = y3;
                 start = end;
             }
 
-            this._xi = x3 * r + x;
-            this._yi = y3 * r + x;
+            this._xi = x3;
+            this._yi = y3;
         },
 
         arcTo : function() {
@@ -225,7 +214,7 @@ define(function(require) {
             
             this.drawingStyle.lineWidth = ctx.lineWidth;
 
-            Matrix2d.copy(this.transform, ctx._transform);
+            Matrix2d.copy(this.transform, ctx.currentTransform);
 
             this._endSubpath();
 
@@ -242,7 +231,7 @@ define(function(require) {
             // The stroke style is affected by the transformation during painting, even if the intended path is the current default path.
             
             // Extract scale
-            var m = ctx._transform._array;
+            var m = ctx.currentTransform._array;
             var sx = Math.sqrt(m[0] * m[0] + m[1] * m[1]);
             var sy = Math.sqrt(m[2] * m[2] + m[3] * m[3]);
             var subpaths = this.subpaths.data();
@@ -298,9 +287,6 @@ define(function(require) {
             if (!this._verticesData.fill) {
                 this._verticesData.fill = {
                     position : null,
-                    color : null,
-                    t0 : null,
-                    t1 : null,
                     coord : null
                 }
             }
@@ -309,7 +295,7 @@ define(function(require) {
             var nVertices = 0;
             var subpaths = this.subpaths.data();
             var nSubpaths = this.subpaths.size();
-            for (var s = 0; s < this.subpaths.size(); s++) {
+            for (var s = 0; s < nSubpaths; s++) {
                 var subpath = subpaths[s];
                 if (!subpath._fill) {
                     continue;
@@ -323,25 +309,15 @@ define(function(require) {
             if (!fillData.position || fillData.position.length !== nVertices * 3) {
                 // Re allocate
                 fillData.position = new Float32Array(nVertices * 3);
-                fillData.color = new Float32Array(nVertices * 4);
-                fillData.t0 = new Float32Array(nVertices * 3);
-                fillData.t1 = new Float32Array(nVertices * 3);
                 fillData.coord = new Float32Array(nVertices * 3);
             }
 
             var positionArr = fillData.position;
-            var colorArr = fillData.color;
-            var t0Arr = fillData.t0;
-            var t1Arr = fillData.t1;
             var coordArr = fillData.coord;
 
-            var color = this.drawingStyle.fillStyle;
-            var alpha = this.drawingStyle.globalAlpha;
-            var mat = this.transform._array;
             var z = this.depth;
 
             var offset3 = 0;
-            var offset4 = 0;
 
             for (var s = 0; s < nSubpaths; s++) {
                 var subpath = subpaths[s];
@@ -356,26 +332,12 @@ define(function(require) {
                     positionArr[offset3] = interiorPoly.points[idx * 2];
                     positionArr[offset3 + 1] = interiorPoly.points[idx * 2 + 1];
                     positionArr[offset3 + 2] = z;
-                    // Set fill style
-                    colorArr[offset4] = color[0];
-                    colorArr[offset4 + 1] = color[1];
-                    colorArr[offset4 + 2] = color[2];
-                    colorArr[offset4 + 3] = color[3] * alpha;
-                    // Set t0
-                    t0Arr[offset3] = mat[0];
-                    t0Arr[offset3 + 1] = mat[2];
-                    t0Arr[offset3 + 2] = mat[4];
-                    // Set t1
-                    t1Arr[offset3] = mat[1];
-                    t1Arr[offset3 + 1] = mat[3];
-                    t1Arr[offset3 + 2] = mat[5];
                     // Coord
                     coordArr[offset3] = 0;
                     coordArr[offset3 + 1] = 1;
                     coordArr[offset3 + 2] = 1;
 
                     offset3 += 3;
-                    offset4 += 4;
                 }
                 // Add cubic bezier curve triangles
                 var curves = subpath.fillCurveSegments;
@@ -389,27 +351,12 @@ define(function(require) {
                         coordArr[offset3] = coords[idx * 3];
                         coordArr[offset3 + 1] = coords[idx * 3 + 1];
                         coordArr[offset3 + 2] = coords[idx * 3 + 2];
-
                         // Set position
                         positionArr[offset3] = cps[idx * 2];
                         positionArr[offset3 + 1] = cps[idx * 2 + 1];
                         positionArr[offset3 + 2] = z;
-                        // Set fill stylet
-                        colorArr[offset4] = color[0];
-                        colorArr[offset4 + 1] = color[1];
-                        colorArr[offset4 + 2] = color[2];
-                        colorArr[offset4 + 3] = color[3] * alpha;
-                        // Set t0
-                        t0Arr[offset3] = mat[0];
-                        t0Arr[offset3 + 1] = mat[2];
-                        t0Arr[offset3 + 2] = mat[4];
-                        // Set t1
-                        t1Arr[offset3] = mat[1];
-                        t1Arr[offset3 + 1] = mat[3];
-                        t1Arr[offset3 + 2] = mat[5];
 
                         offset3 += 3;
-                        offset4 += 4;
                     }
                 }
             }
@@ -418,10 +365,7 @@ define(function(require) {
         _updateStrokeVertices : function() {
             if (!this._verticesData.stroke) {
                 this._verticesData.stroke = {
-                    position : null,
-                    color : null,
-                    t0 : null,
-                    t1 : null
+                    position : null
                 }
             }
             var strokeData = this._verticesData.stroke;
@@ -440,21 +384,11 @@ define(function(require) {
             if (!strokeData.position || strokeData.position.length !== nVertices * 3) {
                 // Re allocate
                 strokeData.position = new Float32Array(nVertices * 3);
-                strokeData.color = new Float32Array(nVertices * 4);
-                strokeData.t0 = new Float32Array(nVertices * 3);
-                strokeData.t1 = new Float32Array(nVertices * 3);
             }
             var positionArr = strokeData.position;
-            var colorArr = strokeData.color;
-            var t0Arr = strokeData.t0;
-            var t1Arr = strokeData.t1;
 
             var offset3 = 0;
-            var offset4 = 0;
 
-            var color = this.drawingStyle.strokeStyle;
-            var alpha = this.drawingStyle.globalAlpha;
-            var mat = this.transform._array;
             var z = this.depth;
 
             var nSubpaths = this.subpaths.size();
@@ -472,22 +406,8 @@ define(function(require) {
                     positionArr[offset3 + 1] = vertices[i * 2 + 1];
                     // Add a offset to avoid z conflict
                     positionArr[offset3 + 2] = z + 0.001;
-                    // Set fill style
-                    colorArr[offset4] = color[0];
-                    colorArr[offset4 + 1] = color[1];
-                    colorArr[offset4 + 2] = color[2];
-                    colorArr[offset4 + 3] = color[3] * alpha;
-                    // Set t0
-                    t0Arr[offset3] = mat[0];
-                    t0Arr[offset3 + 1] = mat[2];
-                    t0Arr[offset3 + 2] = mat[4];
-                    // Set t1
-                    t1Arr[offset3] = mat[1];
-                    t1Arr[offset3 + 1] = mat[3];
-                    t1Arr[offset3 + 2] = mat[5];
 
                     offset3 += 3;
-                    offset4 += 4;
                 }
             }
         },
