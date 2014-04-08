@@ -36,6 +36,8 @@ define(function(require) {
 
         _painter : null,
 
+        _textAtlas : null,
+
         _depth : 1
 
     }, function() {
@@ -88,11 +90,11 @@ define(function(require) {
         /******************
          * Fonts
          *****************/
-        font : '',
+        font : '10px sans-serif',
 
-        textAlign : '',
+        textAlign : 'start',
 
-        textBaseline : '',
+        textBaseline : 'alphabetic',
 
         /******************
          * Line styles
@@ -207,8 +209,34 @@ define(function(require) {
         /******************
          * Texts
          *****************/
-        strokeText : function() {},
-        fillText : function() {},
+        strokeText : function(text, x, y, maxWidth) {
+            return this._drawText(text, 'stroke', x, y, maxWidth);
+        },
+
+        fillText : function(text, x, y, maxWidth) {
+            return this._drawText(text, 'fill', x, y, maxWidth);
+        },
+
+        _drawText : function(text, type, x, y, maxWidth) {
+            if (!this._painter) {
+                return;
+            }
+
+            if (!this._textAtlas) {
+                this._textAtlas = this._painter.getNewTextAtlas();
+            }
+            var cImage = this._textAtlas.addText(text, type, x, y, maxWidth, this);
+            if (!cImage) {
+                this._textAtlas = this._painter.getNewTextAtlas();
+                cImage = this._textAtlas.addText(text, type, x, y, maxWidth, this);
+            }
+
+            cImage.end(this);
+            this._painter.addElement(cImage);
+
+            return cImage;
+        },
+
         measureText : function() {},
 
         /******************
@@ -297,6 +325,7 @@ define(function(require) {
             }
             painter.begin();
             this._painter = painter;
+            this._textAtlas = null;
 
             return painter;
         },

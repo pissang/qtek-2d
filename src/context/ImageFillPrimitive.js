@@ -49,7 +49,7 @@ define(function(require) {
             this._images.length = 0;
         },
 
-        updateElements : function() {
+        updateElements : function(disableBlending) {
             if (this._images.length == 0) {
                 return;
             }
@@ -77,7 +77,9 @@ define(function(require) {
             // TODO
             // If image is transparent and overlapped, the result will wrong, many pixels that should be
             // drawn will be discarded
-            // this._images.sort(this._sortFunc);
+            if (disableBlending) {
+                this._images.sort(this._sortFunc);
+            }
 
             for (var i = 0; i < this._images.length; i++) {
                 var image = this._images[i];

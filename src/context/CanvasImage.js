@@ -95,7 +95,7 @@ define(function(require) {
     }
 
     CanvasImage.prototype.getHashKey = function() {
-        return this.eType * 10086 + this.image.__IID__;
+        return this.eType + '_' + this.image.__IID__ ;
     }
 
     CanvasImage.prototype.updateVertices = function() {

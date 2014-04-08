@@ -20,6 +20,12 @@ define(function (require) {
 
             ctx.lineWidth = this.lineWidth;
 
+            ctx.font = this.font;
+
+            ctx.textBaseline = this.textBaseline;
+
+            ctx.textAlign = this.textAlign;
+
             mat2d.copy(ctx.currentTransform._array, this._matrix);
         },
 
@@ -30,6 +36,12 @@ define(function (require) {
             this.fillStyle = ctx.fillStyle;
 
             this.lineWidth = ctx.lineWidth;
+
+            this.font = ctx.font;
+
+            this.textBaseline = ctx.textBaseline;
+
+            this.textAlign = ctx.textAlign;
 
             mat2d.copy(this._matrix, ctx.currentTransform._array);
         }

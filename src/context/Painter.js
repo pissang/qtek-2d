@@ -13,6 +13,7 @@ define(function(require) {
     var ImageFillPrimitive = require('./ImageFillPrimitive');
     var CanvasPath  = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
+    var ImageAtlas = require('./tool/ImageAtlas');
 
     var Painter = Base.derive(function() {
         
@@ -24,6 +25,8 @@ define(function(require) {
 
             _fillPrimitiveLists : [],
             _strokePrimitiveLists : [],
+
+            _textAtlas : new CachedList(ImageAtlas, 2),
 
             _blending : true,
 
@@ -50,6 +53,7 @@ define(function(require) {
         } 
 
         this._disposePrimitive = this._disposePrimitive.bind(this);
+        this._disposeImageAtlas = this._disposeImageAtlas.bind(this);
     }, {
 
         addElement : function(el) {
@@ -75,6 +79,9 @@ define(function(require) {
         },
 
         begin : function() {
+
+            this.beginTextAtlas();
+
             for (var i = 0; i < this._primitives.length; i++) {
                 this._primitives[i].clearElements();
             }
@@ -104,10 +111,10 @@ define(function(require) {
                     if (el.getHashKey() != hashKey) {
                         // End previous fillPrimitive
                         if (fillPrimitive) {
-                            fillPrimitive.updateElements();
+                            fillPrimitive.updateElements(false);
                         }
                         if (strokePrimitive) {
-                            strokePrimitive.updateElements();
+                            strokePrimitive.updateElements(false);
                         }
                         // Begin a new fillPrimitive
                         var list = this._fillPrimitiveLists[el.eType];
@@ -144,31 +151,65 @@ define(function(require) {
                 }
                 // End last fillPrimitive
                 if (fillPrimitive) {
-                    fillPrimitive.updateElements();
+                    fillPrimitive.updateElements(false);
                 }
                 if (strokePrimitive) {
-                    strokePrimitive.updateElements();
+                    strokePrimitive.updateElements(false);
                 }
             } else {
                 // TODO
                 for (var i = 0; i < this._fillPrimitiveLists.length; i++) {
-                    var primitive = this._fillPrimitiveLists[i].increase();
-                    primitive.clearElements();
-                    this._primitives.push(primitive);
+                    if (this._fillPrimitiveLists[i]) {
+                        var primitive = this._fillPrimitiveLists[i].increase();
+                        primitive.clearElements();
+                        this._primitives.push(primitive);
+                    }
+                }
+                for (var i = 0; i < this._strokePrimitiveLists.length; i++) {
+                    if (this._strokePrimitiveLists[i]) {
+                        var primitive = this._strokePrimitiveLists[i].increase();
+                        primitive.clearElements();
+                        this._primitives.push(primitive);
+                    }
                 }
                 for (var i = 0; i < this._elements.length; i++) {
                     var el = this._elements[i];
-                    var primitive = this._fillPrimitiveLists[el.eType].get(0);
-                    primitive.addElement(el);
+                    if (el.hasFill()) {
+                        var primitive = this._fillPrimitiveLists[el.eType].get(0);
+                        primitive.addElement(el);
+                    }
+                    if (el.hasStroke()) {
+                        var primitive = this._strokePrimitiveLists[el.eType].get(0);
+                        primitive.addElement(el);
+                    }
                 }
-                for (var i = 0; i < this._fillPrimitiveLists.length; i++) {
-                    this._fillPrimitiveLists[i].updateElements();
+                for (var i = 0; i < this._primitives.length; i++) {
+                    this._primitives[i].updateElements(true);
                 }
             }
         },
 
+        beginTextAtlas : function() {
+            this._textAtlas.clear(this._disposeImageAtlas);
+        },
+
+        getNewTextAtlas : function() {
+            var textAtlas = this._textAtlas.increase();
+            textAtlas.clear();
+
+            return textAtlas;
+        },
+
+        endTextAtlas : function() {
+
+        },
+
         _disposePrimitive : function(primitive) {
             primitive.geometry.dispose(this._gl);
+        },
+
+        _disposeImageAtlas : function(imageAtlas) {
+            imageAtlas.dispose(this._gl);
         },
 
         _eleDepthSortFunc : function(a, b) {

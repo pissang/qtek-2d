@@ -28,6 +28,7 @@ define( function(require){
 		"tool": {
 			"CachedList": require('qtek/2d/context/tool/CachedList'),
 			"GJK": require('qtek/2d/context/tool/GJK'),
+			"ImageAtlas": require('qtek/2d/context/tool/ImageAtlas'),
 			"LinkedList": require('qtek/2d/context/tool/LinkedList'),
 			"SplayTree": require('qtek/2d/context/tool/SplayTree'),
 			"Triangulation2": require('qtek/2d/context/tool/Triangulation2'),

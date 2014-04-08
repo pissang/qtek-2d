@@ -20,9 +20,7 @@
                 width : 1024,
                 height : 600
             });
-            var scene = new qtek2d.Scene();
 
-            scene.add(node);
             node.style = new qtek2d.Style({
                 // globalCompositeOperation : 'xor'
             });
@@ -53,7 +51,7 @@
             console.profileEnd("compute bounding box");
 
             console.profile("render");
-            renderer.render(scene);
+            renderer.render(node);
             console.profileEnd("render");
         });
     </script>

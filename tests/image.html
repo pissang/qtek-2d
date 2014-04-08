@@ -24,8 +24,9 @@
             animation.start();
 
             image.onload = function() {
-                var start = performance.now();
                 var painter = ctx.beginDraw();
+                painter.disableBlending();
+
                 var images = [];
                 for (var i = 0; i < 2000; i++) {
                     images.push(
@@ -34,8 +35,7 @@
                 }
 
                 ctx.endDraw();
-                console.log(performance.now() - start);
-                // painter.disableBlending();
+
                 animation.on('frame', function(dTime) {
                     console.log(dTime);
                     ctx.clear();

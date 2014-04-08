@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body>
+    <canvas id="main"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var start = performance.now();
+            var painter = ctx.beginDraw();
+
+            ctx.font = "20px Helvetica";
+            ctx.textBaseline = 'top';
+            ctx.fillText('测试', 10, 10);
+            ctx.endDraw();
+            console.log(performance.now() - start);
+        });
+    </script>
+</body>
+</html>
