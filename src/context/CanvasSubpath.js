@@ -76,16 +76,30 @@ define(function(require) {
 
         this._isEnded = true;
 
-        if (!this.basePolygon.isCCW()) {
+        var area = this.basePolygon.area();
+        if (area > 0) {
             this.reverse();
+        } else if (area == 0) {
+            // TODO
+            // Simple hack when there is only one curve or multiple collinear curve
+            // Of cource there are still some bad case
+            if (this._nFillCurveSegements > 0) {
+                if(!mathTool.isCCW(this.fillCurveSegments[0].points)) {
+                    this.reverse();
+                }
+            }
         }
     }
 
-    CanvasSubpath.prototype.close = function() {
+    CanvasSubpath.prototype.close = function(thickness) {
+        if (this._isClosed) {
+            return;
+        }
         // Add close line
         var poly = this.basePolygon;
         if (poly._nPoints > 1) {
-            var seg = new LineSegment(poly._x0, poly._y0, poly._xi, poly._yi);
+            var seg = new LineSegment(poly._xi, poly._yi, poly._x0, poly._y0);
+            seg.thickness = thickness;
             this.strokeSegments[this._nStrokeSegments++] = seg;
         }
         this._isClosed = true;
@@ -130,6 +144,8 @@ define(function(require) {
         var isClosed = this._checkClose(x1, y1);
         if (!isClosed) {
             this.basePolygon.addPoint(x1, y1);
+        } else {
+            this._isClosed = true;
         }
         
         var seg = new LineSegment(x0, y0, x1, y1);
@@ -158,6 +174,8 @@ define(function(require) {
         var isClosed = this._checkClose(x3, y3);
         if (!isClosed) {
             this.basePolygon.addPoint(x3, y3);
+        } else {
+            this._isClosed = true;
         }
 
         var seg = new BezierCurveSegment(x0, y0, x1, y1, x2, y2, x3, y3);
@@ -380,25 +398,30 @@ define(function(require) {
             var vertices = this.strokeVerticesArray;
             var off = 0;
 
+            var start = this._isClosed ? len - 1 : 0;
+
             // First segment
-            seg = this.strokeSegments[0];
+            seg = this.strokeSegments[start];
             vec2.set(v0, seg.points[0], seg.points[1]);
 
-            for (var i = 0; i < len; i++) {
+            for (var count = 0, i = start; i < len; count++) {
+
                 seg = this.strokeSegments[i];
+
                 switch(seg.type) {
                     case LineSegment.type:
-                        if (i == 0) {
+                        if (count == 0) {
                             vec2.set(v1, seg.points[2], seg.points[3]);
                             vec2.copy(v2, v1);
                             vec2.sub(v12, v1, v0);
                             vec2.normalize(v12, v12);
-                            // Normal of the segment point to the left side
-                            vec2.set(normal, v12[1], -v12[0]);
-                            var thickness = seg.thickness / 2;
-                            vec2.scaleAndAdd(segPoly[0], v0, normal, thickness);
-                            vec2.scaleAndAdd(segPoly[1], v0, normal, -thickness);
-
+                            if (!this._isClosed) {
+                                // Normal of the segment point to the left side
+                                vec2.set(normal, v12[1], -v12[0]);
+                                var thickness = seg.thickness / 2;
+                                vec2.scaleAndAdd(segPoly[0], v0, normal, thickness);
+                                vec2.scaleAndAdd(segPoly[1], v0, normal, -thickness);
+                            }
                         } else {
                             vec2.set(v2, seg.points[2], seg.points[3]);
                             vec2.copy(v01, v12);
@@ -419,17 +442,19 @@ define(function(require) {
                             vec2.scaleAndAdd(segPoly[2], v1, normal, thickness);
                             vec2.scaleAndAdd(segPoly[3], v1, normal, -thickness);
 
-                            // Construct two triangles of previous segment
-                            // 0------2
-                            // |  /   |
-                            // 1------3
-                            vertices[off++] = segPoly[0][0]; vertices[off++] = segPoly[0][1];
-                            vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
-                            vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                            if (i !== 0) {
+                                // Construct two triangles of previous segment
+                                // 0------2
+                                // |  /   |
+                                // 1------3
+                                vertices[off++] = segPoly[0][0]; vertices[off++] = segPoly[0][1];
+                                vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
+                                vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
 
-                            vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
-                            vertices[off++] = segPoly[3][0]; vertices[off++] = segPoly[3][1];
-                            vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                                vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
+                                vertices[off++] = segPoly[3][0]; vertices[off++] = segPoly[3][1];
+                                vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                            }
 
                             vec2.copy(v0, v1);
                             vec2.copy(v1, v2);
@@ -444,8 +469,8 @@ define(function(require) {
                         var ddfx = seg.ddfx, ddfy = seg.ddfy;
                         var dddfx = seg.dddfx, dddfy = seg.dddfy;
 
-                        var k = 0;
-                        if (i == 0) {
+                        var ks = 0;
+                        if (count == 0) {
                             fx += dfx; fy += dfy;
                             dfx += ddfx; dfy += ddfy;
                             ddfx += dddfx; ddfy += dddfy;
@@ -454,15 +479,16 @@ define(function(require) {
 
                             vec2.sub(v12, v1, v0);
                             vec2.normalize(v12, v12);
-                            // Normal of the segment
-                            vec2.set(normal, v12[1], -v12[0]);
-                            var thickness = seg.thickness / 2;
-                            vec2.scaleAndAdd(segPoly[0], v0, normal, thickness);
-                            vec2.scaleAndAdd(segPoly[1], v0, normal, -thickness);
-
-                            k = 1;
+                            if (!this._isClosed) {
+                                // Normal of the segment point to the left side
+                                vec2.set(normal, v12[1], -v12[0]);
+                                var thickness = seg.thickness / 2;
+                                vec2.scaleAndAdd(segPoly[0], v0, normal, thickness);
+                                vec2.scaleAndAdd(segPoly[1], v0, normal, -thickness);
+                            }
+                            ks = 1;
                         }
-                        for (; k < seg.strokeSteps; k++) {
+                        for (var k = ks; k < seg.strokeSteps; k++) {
                             // normal of the vertex
                             var nx = v01[0] - v12[0];
                             var ny = v01[1] - v12[1];
@@ -489,13 +515,15 @@ define(function(require) {
                             vec2.scaleAndAdd(segPoly[2], v1, normal, thickness);
                             vec2.scaleAndAdd(segPoly[3], v1, normal, -thickness);
 
-                            vertices[off++] = segPoly[0][0]; vertices[off++] = segPoly[0][1];
-                            vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
-                            vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                            if (!((count == 0 && this._isClosed) || (count == 1 && k == ks && this._isClosed))) {
+                                vertices[off++] = segPoly[0][0]; vertices[off++] = segPoly[0][1];
+                                vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
+                                vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
 
-                            vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
-                            vertices[off++] = segPoly[3][0]; vertices[off++] = segPoly[3][1];
-                            vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                                vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
+                                vertices[off++] = segPoly[3][0]; vertices[off++] = segPoly[3][1];
+                                vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
+                            }
 
                             vec2.copy(v0, v1);
                             vec2.copy(v1, v2);
@@ -506,13 +534,23 @@ define(function(require) {
                     default:
                         break;
                 }
+                
+                if (this._isClosed) {
+                    i = count;
+                } else {
+                    i++;
+                }
             } // end of segments loop
 
             // Last seg
-            vec2.set(normal, v12[1], -v12[0]);
-            vec2.scaleAndAdd(segPoly[2], v2, normal, seg.thickness / 2);
-            vec2.scaleAndAdd(segPoly[3], v2, normal, -seg.thickness / 2);
-
+            if (!this._isClosed) {
+                vec2.set(normal, v12[1], -v12[0]);
+                vec2.scaleAndAdd(segPoly[2], v2, normal, seg.thickness / 2);
+                vec2.scaleAndAdd(segPoly[3], v2, normal, -seg.thickness / 2);
+            } else {
+                vec2.set(segPoly[2], vertices[0], vertices[1]);
+                vec2.set(segPoly[3], vertices[2], vertices[3]);
+            }
             vertices[off++] = segPoly[0][0]; vertices[off++] = segPoly[0][1];
             vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
             vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
@@ -520,12 +558,21 @@ define(function(require) {
             vertices[off++] = segPoly[1][0]; vertices[off++] = segPoly[1][1];
             vertices[off++] = segPoly[3][0]; vertices[off++] = segPoly[3][1];
             vertices[off++] = segPoly[2][0]; vertices[off++] = segPoly[2][1];
-
         }
     })()
 
     CanvasSubpath.prototype.isValid = function() {
-        return this._nFillSegments > 0;
+        if (this._nFillSegments > 1) {
+            return true;
+        } else if (this._nFillSegments == 1) {
+            if (this._nFillCurveSegements > 0) {
+                return true;
+            } else {
+                if (this.basePolygon.points.length > 2) {
+                    return true;
+                }
+            }
+        }
     }
 
     // Reverse the orientation
@@ -533,8 +580,8 @@ define(function(require) {
         mathTool.reverse(this.fillSegments, this._nFillSegments, 1);
         mathTool.reverse(this.strokeSegments, this._nStrokeSegments, 1);
 
-        for (var i = 0; i < this._nFillSegments; i++) {
-            this.fillSegments[i].reverse();
+        for (var i = 0; i < this._nStrokeSegments; i++) {
+            this.strokeSegments[i].reverse();
         }
     }
 

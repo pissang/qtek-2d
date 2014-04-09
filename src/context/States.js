@@ -18,6 +18,8 @@ define(function (require) {
 
             ctx.fillStyle = this.fillStyle;
 
+            ctx.globalAlpha = this.globalAlpha;
+
             ctx.lineWidth = this.lineWidth;
 
             ctx.font = this.font;
@@ -34,6 +36,8 @@ define(function (require) {
             this.strokeStyle = ctx.strokeStyle;
 
             this.fillStyle = ctx.fillStyle;
+
+            this.globalAlpha = ctx.globalAlpha;
 
             this.lineWidth = ctx.lineWidth;
 

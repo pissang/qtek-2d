@@ -1,24 +1,19 @@
 define(function(require) {
 
     var CanvasImage = require('../CanvasImage');
+    var Texture = require('qtek/Texture');
 
     var BLOCK_SIZE = 1024;
+
+    var windowsDevicePixelRatio = window.devicePixelRatio || 1.0; 
 
     var ImageAtlas = function() {
 
         this._canvas = document.createElement('canvas');
         this._ctx2d = this._canvas.getContext('2d');
 
-        this._canvas.width = BLOCK_SIZE;
-        this._canvas.height = BLOCK_SIZE;
-
         this._offsetX = 0;
         this._offsetY = 0;
-
-        // Each block is BLOCK_SIZE x BLOCK_SIZE
-        this._currentBlock = 0;
-
-        this._nBlockSqrt = 1;
 
         this._texture = null;
 
@@ -26,11 +21,13 @@ define(function(require) {
     }
 
     ImageAtlas.prototype.clear = function() {
-        this._canvas.width = BLOCK_SIZE;
-        this._canvas.height = BLOCK_SIZE;
+        this._canvas.width = BLOCK_SIZE * windowsDevicePixelRatio;
+        this._canvas.height = BLOCK_SIZE * windowsDevicePixelRatio;
         this._offsetX = this._offsetY = this._currentBlock = 0;
         this._nBlockSqrt = 1;
         this._ctx2d.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+        this._ctx2d.scale(windowsDevicePixelRatio, windowsDevicePixelRatio);
     }
 
     ImageAtlas.prototype.addText = function(text, type, tx, ty, maxWidth, _ctx) {
@@ -49,6 +46,7 @@ define(function(require) {
         // http://stackoverflow.com/questions/1134586/how-can-you-find-the-height-of-text-on-an-html-canvas
         // TODO rendering cn
         var height = ctx.measureText('m').width;
+        var lineHeight = height * 1.5;
 
         if (width > this._canvas.width) {
             console.warn('Text width no longer than ' + this._canvas.width);
@@ -56,10 +54,10 @@ define(function(require) {
 
         if (sx + width > this._canvas.width) {
             sx = 0;
-            if (sy + height > this._canvas.height) {
+            if (sy + lineHeight > this._canvas.height) {
                 return null;
             } else {
-                sy += height;
+                sy += lineHeight;
             }
         }
 
@@ -113,10 +111,17 @@ define(function(require) {
                 break;
         }
 
-        var cImage = new CanvasImage(this._canvas, sx, sy, width, height * 1.5, tx, ty, width, height * 1.5);
+        var cImage = new CanvasImage(
+            this._canvas, 
+            sx * windowsDevicePixelRatio, sy * windowsDevicePixelRatio, width * windowsDevicePixelRatio, lineHeight * windowsDevicePixelRatio,
+            tx, ty, width, lineHeight
+        );
 
         if (cImage) {
             this._texture = cImage.getTexture();
+            this._texture.minFilter = Texture.NEAREST;
+            this._texture.magFilter = Texture.NEAREST;
+            this._texture.useMipmap = false;
         }
 
         return cImage;

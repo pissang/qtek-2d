@@ -38,13 +38,6 @@ define(function(require) {
                         break;
                     case 'z':
                         ctx.closePath();
-                        if (this.fill) {
-                            ctx.fill();
-                        }
-                        if (this.stroke) {
-                            ctx.stroke();
-                        }
-                        ctx.beginPath();
                         break;
                 }
             }

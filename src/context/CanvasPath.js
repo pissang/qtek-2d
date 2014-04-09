@@ -43,6 +43,8 @@ define(function(require) {
         this._fill = false;
         this._stroke = false;
 
+        this._firstCmd = false;
+
         this._xi = 0;
         this._yi = 0;
     }
@@ -58,6 +60,7 @@ define(function(require) {
             if (this._subpath) {
                 this._endSubpath();
             }
+            this._firstCmd = false;
             this._subpath = this._beginSubpath(x, y);
 
             this._xi = x;
@@ -66,13 +69,20 @@ define(function(require) {
 
         lineTo : function(x, y, thickness) {
             if (!this._subpath) {
-                this._subpath = this._beginSubpath(x, y);
-            } else {
-                var isClosed = this._subpath.addLine(this._xi, this._yi, x, y, thickness);
-                if (isClosed) {
-                    // Close the current subpath and begin a new one
-                    this._endSubpath();
+                if (this._firstCmd) {
+                    this._subpath = this._beginSubpath(x, y);
+                    this._xi = x;
+                    this._yi = y;
+                    this._firstCmd = false;
+                    return;
+                } else {
+                    this._subpath = this._beginSubpath(this._xi, this._yi);
                 }
+            }
+            var isClosed = this._subpath.addLine(this._xi, this._yi, x, y, thickness);
+            if (isClosed) {
+                // Close the current subpath and begin a new one
+                this._endSubpath();
             }
 
             this._xi = x;
@@ -81,27 +91,42 @@ define(function(require) {
 
         bezierCurveTo : function(cp1x, cp1y, cp2x, cp2y, x, y, thickness) {
             if (!this._subpath) {
-                this._subpath = this._beginSubpath(x, y);
-            } else {
-                var isClosed = this._subpath.addCubicBezierCurve(this._xi, this._yi, cp1x, cp1y, cp2x, cp2y, x, y, thickness);
-                if (isClosed) {
-                    // Close the current subpath and begin a new one
-                    this._endSubpath();
+                if (this._firstCmd) {
+                    this._subpath = this._beginSubpath(x, y);
+                    this._xi = x;
+                    this._yi = y;
+                    this._firstCmd = false;
+                    return;
+                } else {
+                    this._subpath = this._beginSubpath(this._xi, this._yi);
                 }
             }
+            var isClosed = this._subpath.addCubicBezierCurve(this._xi, this._yi, cp1x, cp1y, cp2x, cp2y, x, y, thickness);
+            if (isClosed) {
+                // Close the current subpath and begin a new one
+                this._endSubpath();
+            }
+
             this._xi = x;
             this._yi = y;
         },
 
         quadraticCurveTo : function(cpx, cpy, x, y, thickness) {
             if (!this._subpath) {
-                this._subpath = this._beginSubpath(x, y);
-            } else {
-                var isClosed = this._subpath.addQuadraticBezierCurve(this._xi, this._yi, cpx, cpy, x, y, thickness);
-                if (isClosed) {
-                    // Close the current subpath and begin a new one
-                    this._endSubpath();
+                if (this._firstCmd) {
+                    this._subpath = this._beginSubpath(x, y);
+                    this._xi = x;
+                    this._yi = y;
+                    this._firstCmd = false;
+                    return;
+                } else {
+                    this._subpath = this._beginSubpath(this._xi, this._yi);
                 }
+            }
+            var isClosed = this._subpath.addQuadraticBezierCurve(this._xi, this._yi, cpx, cpy, x, y, thickness);
+            if (isClosed) {
+                // Close the current subpath and begin a new one
+                this._endSubpath();
             }
             this._xi = x;
             this._yi = y;
@@ -119,6 +144,8 @@ define(function(require) {
                 this._subpath = this._beginSubpath(x0, y0);
                 this._xi = x0;
                 this._yi = y0;
+
+                this._firstCmd = false;
             }
 
             if (!(mathTool.approxEqualInt(x0, this._xi) && mathTool.approxEqualInt(y0, this._yi))) {
@@ -205,17 +232,11 @@ define(function(require) {
             this._subpath = null;
 
             this._stroke = this._fill = false;
+
+            this._firstCmd = true;
         },
 
         end : function(ctx) {
-            
-            this.drawingStyle.setStrokeStyle(ctx.strokeStyle);
-            this.drawingStyle.setFillStyle(ctx.fillStyle);
-            
-            this.drawingStyle.lineWidth = ctx.lineWidth;
-
-            Matrix2d.copy(this.transform, ctx.currentTransform);
-
             this._endSubpath();
 
             this.updateVertices();
@@ -227,6 +248,13 @@ define(function(require) {
                 // PENDING
                 this._endSubpath();
             }
+
+            this.drawingStyle.setStrokeStyle(ctx.strokeStyle);
+            this.drawingStyle.lineWidth = ctx.lineWidth;
+            this.drawingStyle.globalAlpha = ctx.globalAlpha;
+
+            Matrix2d.copy(this.transform, ctx.currentTransform);
+
             // TODO
             // The stroke style is affected by the transformation during painting, even if the intended path is the current default path.
             
@@ -248,6 +276,11 @@ define(function(require) {
             if (this._subpath) {
                 this._endSubpath();
             }
+            
+            this.drawingStyle.setFillStyle(ctx.fillStyle);
+            this.drawingStyle.globalAlpha = ctx.globalAlpha;
+            Matrix2d.copy(this.transform, ctx.currentTransform);
+            
             var subpaths = this.subpaths.data();
             for (var i = 0; i < this.subpaths.size(); i++) {
                 subpaths[i].fill();
@@ -264,9 +297,9 @@ define(function(require) {
             return this._stroke;
         },
 
-        close : function() {
+        close : function(thickness) {
             if (this._subpath) {
-                this._subpath.close();
+                this._subpath.close(thickness);
             }
         },
 

@@ -128,7 +128,7 @@ define(function (require) {
     }
 
     Polygon.prototype.checkClose = function(x, y) {
-        if (this._nPoints > 1 && mathTool.approxEqualInt(x, this.points[0]) && mathTool.approxEqualInt(y, this.points[1])) {
+        if (this._nPoints >= 1 && mathTool.approxEqualInt(x, this._x0) && mathTool.approxEqualInt(y, this._y0)) {
             this._isClosed = true;
             return true;
         }
@@ -137,6 +137,10 @@ define(function (require) {
 
     Polygon.prototype.isCCW = function() {
         return mathTool.area(this.points) < 0;
+    }
+
+    Polygon.prototype.area = function() {
+        return mathTool.area(this.points);
     }
 
     // Make sure not having duplicate neighbour points

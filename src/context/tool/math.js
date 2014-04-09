@@ -6,7 +6,7 @@ define(function() {
             // Signed polygon area
             var n = points.length / 2;
             if (n < 3) {
-                return false;
+                return 0;
             }
             var area = 0;
             for (var i = (n - 1) * 2, j = 0; j < n * 2;) {

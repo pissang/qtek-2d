@@ -79,6 +79,8 @@ define(function(require) {
 
         fillStyle : '#000000',
 
+        globalAlpha : 1,
+
         shadowOffsetX : 0,
 
         shadowOffsetY : 0,
@@ -167,6 +169,10 @@ define(function(require) {
             if (!this._painter) {
                 return;
             }
+            // End previous path
+            if (this._path) {
+                this.endPath();
+            }
             // drawImage(image, dx, dy)
             if (arguments.length == 3) {
                 dx = sx;
@@ -221,6 +227,10 @@ define(function(require) {
             if (!this._painter) {
                 return;
             }
+            // End previous path
+            if (this._path) {
+                this.endPath();
+            }
 
             if (!this._textAtlas) {
                 this._textAtlas = this._painter.getNewTextAtlas();
@@ -264,7 +274,7 @@ define(function(require) {
         },
         closePath : function() {
             if (this._path) {
-                this._path.close();
+                this._path.close(this.lineWidth);
             }
         },
         fill : function() {

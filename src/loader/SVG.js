@@ -244,7 +244,6 @@ define(function(require) {
 
             // TODO svg fill rule
             // https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/fill-rule
-            // path.style.globalCompositeOperation = 'xor';
 
             var d = xmlNode.getAttribute("d") || "";
             path.description = d;
