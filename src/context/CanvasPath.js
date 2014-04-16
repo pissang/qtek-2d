@@ -10,7 +10,7 @@ define(function(require) {
     var CanvasElement = require('./CanvasElement');
     var mathTool = require('./tool/math');
 
-    var util = require('../util');
+    var qtekUtil = require('qtek/core/util');
 
     //
     var ARC_SEG_RADIAN = Math.PI / 4;
@@ -35,8 +35,6 @@ define(function(require) {
         // Depth in z
         this.depth = 0;
 
-        this._verticesData = null;
-
         // Current subpath
         this._subpath = null;
 
@@ -47,6 +45,12 @@ define(function(require) {
 
         this._xi = 0;
         this._yi = 0;
+
+        // Pre calculated vertices data
+        this._verticesData = null;
+
+        this._fillColorChanged = true;
+        this._strokeColorChanged = true;
     }
     CanvasPath.prototype = {
 
@@ -87,10 +91,12 @@ define(function(require) {
 
         setFillStyle : function(color) {
             this.drawingStyle.setFillStyle(color);
+            this._fillColorChanged = true;
         },
 
         setStrokeStyle : function(color) {
             this.drawingStyle.setStrokeStyle(color);
+            this._strokeColorChanged = true;
         },
 
         moveTo : function(x, y) {
@@ -361,6 +367,7 @@ define(function(require) {
                 }
             }
             var fillData = this._verticesData.fill;
+            fillData.dirty = true;
 
             var nVertices = 0;
             var subpaths = this.subpaths.data();
@@ -439,6 +446,7 @@ define(function(require) {
                 }
             }
             var strokeData = this._verticesData.stroke;
+            strokeData.dirty = true;
 
             var nVertices = 0;
             var nSubpaths = this.subpaths.size();
@@ -482,6 +490,7 @@ define(function(require) {
             }
         },
 
+        // Methods provided for Path Primitive
         getFillVertices : function() {
             return this._verticesData.fill;
         },
@@ -505,6 +514,28 @@ define(function(require) {
                 console.warn('Path must have fill or stroke');
                 return path;
             }
+
+            path._fill = this._fill;
+            path._stroke = this._stroke;
+
+            path.depth = this.depth;
+            
+            path.drawingStyle.copy(this.drawingStyle);
+            path.transform.copy(this.transform);
+
+            path._verticesData = {
+                fill: qtekUtil.clone(this._verticesData.fill),
+                stroke: qtekUtil.clone(this._verticesData.stroke)
+            };
+
+            if (path._verticesData.fill) {
+                path._verticesData.fill.dirty = true;
+            }
+            if (path._verticesData.stroke) {
+                path._verticesData.stroke.dirty = true;
+            }
+
+            return path;
         },
 
         _endSubpath : function() {

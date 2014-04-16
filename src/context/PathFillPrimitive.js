@@ -41,12 +41,15 @@ define(function(require) {
                 depthMask : true,
                 depthTest : true
             }),
-            _paths : []
+            _paths : [],
+
+            _needsUpdateAll: false
         };
     }, {
 
         addElement : function(path) {
             this._paths.push(path);
+            this._needsUpdateAll = true;
         },
 
         clearElements : function() {
@@ -61,7 +64,7 @@ define(function(require) {
                 nVertices += this._paths[i].getFillVertexNumber();
             }
 
-            var forceUpdateAll = false;
+            var needsUpdateAll = this._needsUpdateAll;
             if (!geo.attributes.position.value || (geo.getVertexNumber() !== nVertices)) {
                 // Re allocate
                 geo.attributes.position.value = new Float32Array(nVertices * 3);
@@ -70,7 +73,7 @@ define(function(require) {
                 geo.attributes.t1.value = new Float32Array(nVertices * 3);
                 geo.attributes.coord.value = new Float32Array(nVertices * 3);
 
-                forceUpdateAll = true;
+                needsUpdateAll = true;
             }
 
             var offset3 = 0;
@@ -84,31 +87,48 @@ define(function(require) {
                 var path = this._paths[i];
                 var nPathVertices = path.getFillVertexNumber();
                 var mat = path.transform._array;
-                var color = path.drawingStyle.fillStyle;
-                var alpha = path.drawingStyle.globalAlpha;
 
                 var data = path.getFillVertices();
-                geo.attributes.position.value.set(data.position, offset3);
-                geo.attributes.coord.value.set(data.coord, offset3);
+                if (data.dirty || needsUpdateAll) {
+                    geo.attributes.position.value.set(data.position, offset3);
+                    geo.attributes.coord.value.set(data.coord, offset3);
+                    data.dirty = false;
+                }
 
-                for (var k = 0; k < nPathVertices; k++) {
-                    // Set t0
-                    t0Arr[offset3] = mat[0];
-                    t0Arr[offset3 + 1] = mat[2];
-                    t0Arr[offset3 + 2] = mat[4];
-                    // Set t1
-                    t1Arr[offset3] = mat[1];
-                    t1Arr[offset3 + 1] = mat[3];
-                    t1Arr[offset3 + 2] = mat[5];
-                    // Set fill style
-                    colorArr[offset4++] = color[0];
-                    colorArr[offset4++] = color[1];
-                    colorArr[offset4++] = color[2];
-                    colorArr[offset4++] = color[3] * alpha;
+                if (path._fillColorChanged || needsUpdateAll) {
+                    var color = path.drawingStyle.fillStyle;
+                    var alpha = path.drawingStyle.globalAlpha;
+                    for (var k = 0; k < nPathVertices; k++) {
+                        // Set fill style
+                        colorArr[offset4++] = color[0];
+                        colorArr[offset4++] = color[1];
+                        colorArr[offset4++] = color[2];
+                        colorArr[offset4++] = color[3] * alpha;
+                    }
+                    path._fillColorChanged = false;
+                } else {
+                    offset4 += nPathVertices * 4;
+                }
+                if (path.transform._dirty || needsUpdateAll) {
+                    for (var k = 0; k < nPathVertices; k++) {
+                        // Set t0
+                        t0Arr[offset3] = mat[0];
+                        t0Arr[offset3 + 1] = mat[2];
+                        t0Arr[offset3 + 2] = mat[4];
+                        // Set t1
+                        t1Arr[offset3] = mat[1];
+                        t1Arr[offset3 + 1] = mat[3];
+                        t1Arr[offset3 + 2] = mat[5];
 
-                    offset3 += 3;
+                        offset3 += 3;
+                    }
+                    path.transform._dirty = false;
+                } else {
+                    offset3 += nPathVertices * 3;
                 }
             }
+
+            this._needsUpdateAll = false;
 
             geo.dirty();
         }

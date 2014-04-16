@@ -14,8 +14,6 @@ define(function(require) {
     
     // Line Styles
     DrawingStyle.prototype.lineWidth = 1;
-    DrawingStyle.prototype.lineCap = '';
-    DrawingStyle.prototype.lineJoin = '';
 
     // Text styles
     // 
@@ -58,6 +56,23 @@ define(function(require) {
             this.fillStyle[2] = 0;
             this.fillStyle[3] = 1;
         }
+    }
+
+    DrawingStyle.prototype.copy = function(source) {
+        this.strokeStyle = source.strokeStyle.slice();
+        this.fillStyle = source.fillStyle.slice();
+
+        this.lineWidth = source.lineWidth;
+        this.globalAlpha = source.globalAlpha;
+
+        this.shadowOffsetX = source.shadowOffsetX;
+        this.shadowOffsetY = source.shadowOffsetY;
+        this.shadowBlur = source.shadowBlur;
+        this.shadowColor = source.shadowColor.slice();
+    }
+
+    DrawingStyle.prototype.clone = function(source) {
+        
     }
 
 
