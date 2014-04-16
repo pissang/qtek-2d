@@ -70,6 +70,14 @@ define(function(require) {
             ctx.renderer.renderQueue(this._primitives, ctx.camera);
         },
 
+        repaint : function(ctx) {
+            for (var i = 0; i < this._primitives.length; i++) {
+                this._primitives[i].updateElements();
+            }
+
+            this.draw(ctx);
+        },
+
         enableBlending : function() {
             this._blending = true;
         },

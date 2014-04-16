@@ -37,7 +37,10 @@ define(function(require) {
                 depthMask : true,
                 depthTest : true
             }),
-            _images : []
+            
+            _images : [],
+
+            _inDescendantOrder: false
         };
     }, {
 
@@ -47,6 +50,7 @@ define(function(require) {
 
         clearElements : function() {
             this._images.length = 0;
+            this._inDescendantOrder = false;
         },
 
         updateElements : function(disableBlending) {
@@ -73,12 +77,21 @@ define(function(require) {
             var t0Arr = geo.attributes.t0.value;
             var t1Arr = geo.attributes.t1.value;
 
-            // Sort images from near to far, reduce pixel to draw
+            // Reverse images list from near to far
+            // Simply do reverse not sort because the elements will be always add by painters in 
+            // far to near order
+            // 
             // TODO
             // If image is transparent and overlapped, the result will wrong, many pixels that should be
             // drawn will be discarded
-            if (disableBlending) {
-                this._images.sort(this._sortFunc);
+            if (disableBlending && !this._inDescendantOrder) {
+                for (var i = 0, len = this._images.length; i < Math.floor(len / 2); i++) {
+                    var i2 = len - 1;
+                    var tmp = this._images[i];
+                    this._images[i] = this._images[i2];
+                    this._images[i2] = tmp;
+                }
+                this._inDescendantOrder = true;
             }
 
             for (var i = 0; i < this._images.length; i++) {

@@ -61,13 +61,16 @@ define(function(require) {
                 nVertices += this._paths[i].getFillVertexNumber();
             }
 
-            if (!(geo.attributes.position.value) || (geo.getVertexNumber() !== nVertices)) {
+            var forceUpdateAll = false;
+            if (!geo.attributes.position.value || (geo.getVertexNumber() !== nVertices)) {
                 // Re allocate
                 geo.attributes.position.value = new Float32Array(nVertices * 3);
                 geo.attributes.color.value = new Float32Array(nVertices * 4);
                 geo.attributes.t0.value = new Float32Array(nVertices * 3);
                 geo.attributes.t1.value = new Float32Array(nVertices * 3);
                 geo.attributes.coord.value = new Float32Array(nVertices * 3);
+
+                forceUpdateAll = true;
             }
 
             var offset3 = 0;

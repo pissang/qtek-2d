@@ -35,6 +35,7 @@ define(function(require) {
         
         ctx.fillStyle = _ctx.fillStyle;
         ctx.strokeStyle = _ctx.strokeStyle;
+        ctx.font = _ctx.font;
 
         var sx = this._offsetX;
         var sy = this._offsetY;

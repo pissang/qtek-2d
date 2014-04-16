@@ -339,6 +339,16 @@ define(function(require) {
 
             return painter;
         },
+        addPath : function(path) {
+            if (this._painter) {
+                this._painter.addElement(path);
+            }
+        },
+        addImage: function(image) {
+            if (this._painter) {
+                this._painter.addElement(image);
+            }
+        },
         clearColor : function(color) {
             var _gl = this.renderer.gl;
             if (color) {

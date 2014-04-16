@@ -121,6 +121,17 @@ define(function(require) {
         }
     }
 
+    CanvasSubpath.prototype.updateStrokeThickness = function(thickness) {
+        if (this._stroke) {
+            for (var i = 0; i < this.segments.length; i++) {
+                var seg = this.strokeSegments[i];
+                seg.thickness = thickness;
+            }
+
+            this._convertLineToPolygon();
+        }
+    }
+
     CanvasSubpath.prototype.fill = function() {
         if (!this._fill) {
             // Assume the subpath is ended

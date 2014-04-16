@@ -69,68 +69,77 @@ define(function(require) {
         this._verticesData = null;
     }
 
-    CanvasImage.prototype.begin = function(){}
+    CanvasImage.prototype = {
 
-    CanvasImage.prototype.end = function(ctx) {
-        this.depth = ctx.requestDepthChannel();
-        Matrix2d.copy(this.transform, ctx.currentTransform);
+        constructor : CanvasImage,
 
-        this.updateVertices();
-    }
+        begin : function(){},
 
-    CanvasImage.prototype.getTexture = function() {
-        return this._texture;
-    }
+        end : function(ctx) {
+            this.depth = ctx.requestDepthChannel();
+            Matrix2d.copy(this.transform, ctx.currentTransform);
 
-    CanvasImage.prototype.hasFill = function() {
-        return true;
-    }
+            this.updateVertices();
+        },
 
-    CanvasImage.prototype.hasStroke = function() {
-        return false;
-    }
+        getTexture : function() {
+            return this._texture;
+        },
 
-    CanvasImage.prototype.dispose = function(ctx) {
-        CanvasImage.disposeImage(this.image, ctx.renderer.gl);   
-    }
+        hasFill : function() {
+            return true;
+        },
 
-    CanvasImage.prototype.getHashKey = function() {
-        return this.eType + '_' + this.image.__IID__ ;
-    }
+        hasStroke : function() {
+            return false;
+        },
 
-    CanvasImage.prototype.updateVertices = function() {
+        dispose : function(ctx) {
+            CanvasImage.disposeImage(this.image, ctx.renderer.gl);   
+        },
 
-        if (!this._verticesData) {
-            this._verticesData = {
-                position : new Float32Array(18),
-                texcoord : new Float32Array(12)
+        getHashKey : function() {
+            return this.eType + '_' + this.image.__IID__ ;
+        },
+
+        updateVertices : function() {
+
+            if (!this._verticesData) {
+                this._verticesData = {
+                    position : new Float32Array(18),
+                    texcoord : new Float32Array(12)
+                }
             }
-        }
 
-        var positionArr = this._verticesData.position;
-        var texcoordArr = this._verticesData.texcoord;
+            var positionArr = this._verticesData.position;
+            var texcoordArr = this._verticesData.texcoord;
 
-        var z = this.depth;
+            var z = this.depth;
 
-        var offset3 = 0;
-        var offset2 = 0;
-        for (var k = 0; k < 6; k++) {
-            var idx = quadTriangles[k];
-            // Set position
-            positionArr[offset3] = this.quadPositions[idx][0];
-            positionArr[offset3 + 1] = this.quadPositions[idx][1];
-            positionArr[offset3 + 2] = z;
-            // Set texcoord
-            texcoordArr[offset2] = this.quadTexcoords[idx][0];
-            texcoordArr[offset2 + 1] = this.quadTexcoords[idx][1];
+            var offset3 = 0;
+            var offset2 = 0;
+            for (var k = 0; k < 6; k++) {
+                var idx = quadTriangles[k];
+                // Set position
+                positionArr[offset3] = this.quadPositions[idx][0];
+                positionArr[offset3 + 1] = this.quadPositions[idx][1];
+                positionArr[offset3 + 2] = z;
+                // Set texcoord
+                texcoordArr[offset2] = this.quadTexcoords[idx][0];
+                texcoordArr[offset2 + 1] = this.quadTexcoords[idx][1];
+                
+                offset3 += 3;
+                offset2 += 2;
+            }
+        },
+
+        getVertices : function() {
+            return this._verticesData;
+        },
+
+        clone : function() {
             
-            offset3 += 3;
-            offset2 += 2;
         }
-    }
-
-    CanvasImage.prototype.getVertices = function() {
-        return this._verticesData;
     }
 
     // Static methods

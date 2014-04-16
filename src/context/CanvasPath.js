@@ -56,6 +56,43 @@ define(function(require) {
             return this.eType;
         },
 
+        setStyle : function(styleName, value) {
+            if (styleName == 'fillStyle') {
+                this.setFillStyle(value);
+            } else if (styleName == 'strokeStyle') {
+                this.setStrokeStyle(value);
+            } else if (styleName == 'lineWidth') {
+
+            } else {
+                this.drawingStyle[styleName] = value;
+            }
+        },
+
+        setStrokeLineWidth : function(lineWidth) {
+            if (!this._stroke) {
+                return;
+            }
+
+            if (lineWidth !== this.drawingStyle.lineWidth) {
+                this.drawingStyle.lineWidth = lineWidth;
+
+                var subpaths = this.subpaths.data();
+                for (var i = 0; i < this.subpaths.size(); i++) {
+                    subpaths[i].updateStrokeThickness(lineWidth);
+                }
+
+                this._updateStrokeVertices();
+            }
+        },
+
+        setFillStyle : function(color) {
+            this.drawingStyle.setFillStyle(color);
+        },
+
+        setStrokeStyle : function(color) {
+            this.drawingStyle.setStrokeStyle(color);
+        },
+
         moveTo : function(x, y) {
             if (this._subpath) {
                 this._endSubpath();
@@ -459,6 +496,15 @@ define(function(require) {
 
         getStrokeVertexNumber : function() {
             return this._verticesData.stroke.position.length / 3;
+        },
+
+        clone : function() {
+            var path = new CanvasPath();
+
+            if (!(this._fill || this._stroke)) {
+                console.warn('Path must have fill or stroke');
+                return path;
+            }
         },
 
         _endSubpath : function() {
