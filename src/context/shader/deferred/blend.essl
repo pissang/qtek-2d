@@ -1,0 +1,38 @@
+@export buildin.2d.deferred.blend
+
+uniform sampler2D color1;
+uniform sampler2D depth1;
+
+uniform sampler2D color2;
+uniform sampler2D depth2;
+
+varying vec2 v_Texcoord;
+
+float decodeFloat(const in vec4 colour)
+{
+    const vec4 bitShifts = vec4(1.0 / ( 256.0 * 256.0 * 256.0 ), 1.0 / ( 256.0 * 256.0 ), 1.0 / 256.0, 1.0);
+    return dot(colour, bitShifts);
+}
+
+void main()
+{
+
+    vec4 c1 = texture2D(color1, v_Texcoord);
+    vec4 c2 = texture2D(color2, v_Texcoord);
+
+    #ifdef DEPTH_DECODE
+        float d1 = decodeFloat(texture2D(depth1, v_Texcoord));
+        float d2 = decodeFloat(texture2D(depth2, v_Texcoord));
+    #else
+        float d1 = texture2D(depth1, v_Texcoord).r;
+        float d2 = texture2D(depth2, v_Texcoord).r;
+    #endif
+
+    if (d1 > d2) {
+        gl_FragColor = c1 * (1.0 - c2.a) + c2 * c2.a;
+    } else {
+        gl_FragColor = c2 * (1.0 - c1.a) + c1 * c1.a;
+    }
+}
+
+@end

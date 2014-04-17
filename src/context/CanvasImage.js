@@ -137,6 +137,10 @@ define(function(require) {
             return this._verticesData;
         },
 
+        afterDraw : function() {
+
+        },
+
         clone : function() {
             
         }

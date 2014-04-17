@@ -1,4 +1,3 @@
-// TODO painter clear
 define(function(require) {
     
     'use strict'
@@ -68,6 +67,11 @@ define(function(require) {
                 _gl.disable(_gl.BLEND);
             }
             ctx.renderer.renderQueue(this._primitives, ctx.camera);
+
+            // FRESH all elements after draw
+            for (var i = 0; i < this._elements.length; i++) {
+                this._elements[i].afterDraw();
+            }
         },
 
         repaint : function(ctx) {
@@ -117,13 +121,6 @@ define(function(require) {
                     var el = this._elements[i];
                     var elHashKey = el.getHashKey();
                     if (el.getHashKey() != hashKey) {
-                        // End previous fillPrimitive
-                        if (fillPrimitive) {
-                            fillPrimitive.updateElements(false);
-                        }
-                        if (strokePrimitive) {
-                            strokePrimitive.updateElements(false);
-                        }
                         // Begin a new fillPrimitive
                         var list = this._fillPrimitiveLists[el.eType];
                         if (list) {
@@ -157,12 +154,8 @@ define(function(require) {
                         strokePrimitive.addElement(el);
                     }
                 }
-                // End last fillPrimitive
-                if (fillPrimitive) {
-                    fillPrimitive.updateElements(false);
-                }
-                if (strokePrimitive) {
-                    strokePrimitive.updateElements(false);
+                for (var i = 0; i < this._primitives.length; i++) {
+                    this._primitives[i].updateElements();
                 }
             } else {
                 // TODO

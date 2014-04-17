@@ -483,7 +483,7 @@ define(function(require) {
                     positionArr[offset3] = vertices[i * 2];
                     positionArr[offset3 + 1] = vertices[i * 2 + 1];
                     // Add a offset to avoid z conflict
-                    positionArr[offset3 + 2] = z + 0.001;
+                    positionArr[offset3 + 2] = z + 0.005;
 
                     offset3 += 3;
                 }
@@ -505,6 +505,19 @@ define(function(require) {
 
         getStrokeVertexNumber : function() {
             return this._verticesData.stroke.position.length / 3;
+        },
+
+        afterDraw : function() {
+            this.transform._dirty = false;
+            this._fillColorChanged = false;
+            this._strokeColorChanged = false;
+
+            if (this._verticesData.fill) {
+                this._verticesData.fill.dirty = false;
+            }
+            if (this._verticesData.stroke) {
+                this._verticesData.stroke.dirty = false;
+            }
         },
 
         clone : function() {

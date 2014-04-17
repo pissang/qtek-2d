@@ -1,0 +1,47 @@
+@export buildin.2d.deferred.depth.vertex
+
+attribute vec3 position;
+attribute vec3 t0;
+attribute vec3 t1;
+
+uniform mat4 worldViewProjection : WORLDVIEWPROJECTION;
+
+void main()
+{
+    mat3 localTransform = mat3(
+        t0.x, t1.x, 0.0,
+        t0.y, t1.y, 0.0,
+        t0.z, t1.z, 1.0
+    );
+    vec3 pos2d = vec3(position.xy, 1.0);
+    pos2d = localTransform * pos2d;
+    vec4 pos3d = vec4(pos2d.xy, position.z, 1.0);
+
+    gl_Position = worldViewProjection * pos3d;
+}
+
+@end
+
+@export buildin.2d.deferred.depth.fragment
+
+vec4 encodeFloat(const in float depth)
+{
+    const vec4 bitShifts = vec4(256.0 * 256.0 * 256.0, 256.0 * 256.0, 256.0, 1.0);
+
+    const vec4 bit_mask  = vec4(0.0, 1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0);
+    vec4 res = fract( depth * bitShifts );
+    res -= res.xxyz * bit_mask;
+
+    return res;
+}
+
+void main()
+{
+    float depth = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far)
+                    / (gl_DepthRange.far - gl_DepthRange.near);
+
+    gl_FragColor = encodeFloat(depth);
+}
+
+@end
+

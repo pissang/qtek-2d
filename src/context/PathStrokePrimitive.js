@@ -86,8 +86,7 @@ define(function(require) {
                 
                 var data = path.getStrokeVertices();
                 if (path.dirty || needsUpdateAll) {
-                    geo.attributes.position.value.set(data.position, offset3);   
-                    path.dirty = false;
+                    geo.attributes.position.value.set(data.position, offset3);
                 }
 
                 if (path._strokeColorChanged || needsUpdateAll) {
@@ -100,7 +99,6 @@ define(function(require) {
                         colorArr[offset4++] = color[2];
                         colorArr[offset4++] = color[3] * alpha;
                     }
-                    path._strokeColorChanged = false;
                 } else {
                     offset4 += nVertices * 4;
                 }
@@ -117,7 +115,6 @@ define(function(require) {
 
                         offset3 += 3;
                     }
-                    path.transform._dirty = false;
                 } else {
                     offset3 += nPathVertices * 3;
                 }

@@ -92,7 +92,6 @@ define(function(require) {
                 if (data.dirty || needsUpdateAll) {
                     geo.attributes.position.value.set(data.position, offset3);
                     geo.attributes.coord.value.set(data.coord, offset3);
-                    data.dirty = false;
                 }
 
                 if (path._fillColorChanged || needsUpdateAll) {
@@ -105,7 +104,6 @@ define(function(require) {
                         colorArr[offset4++] = color[2];
                         colorArr[offset4++] = color[3] * alpha;
                     }
-                    path._fillColorChanged = false;
                 } else {
                     offset4 += nPathVertices * 4;
                 }
@@ -122,7 +120,6 @@ define(function(require) {
 
                         offset3 += 3;
                     }
-                    path.transform._dirty = false;
                 } else {
                     offset3 += nPathVertices * 3;
                 }

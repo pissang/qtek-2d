@@ -12,6 +12,8 @@ define(function(require) {
     var OrthoCamera = require('qtek/camera/Orthographic');
 
     var Painter = require('./Painter');
+    var DeferredPainter = require('./DeferredPainter');
+
     // Canvas Element
     var CanvasPath = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
@@ -56,7 +58,7 @@ define(function(require) {
                 right : width / 2,
                 top : height / 2,
                 bottom : -height / 2,
-                far : 100,
+                far : 50,
                 near : 0
             });
             this.camera.scale.y = -1;
@@ -331,7 +333,7 @@ define(function(require) {
          *****************/
         beginDraw : function(painter) {
             if (!painter) {
-                painter = new Painter();
+                painter = new DeferredPainter();
             }
             painter.begin();
             this._painter = painter;
@@ -393,6 +395,10 @@ define(function(require) {
         // Get current depth channel
         requestDepthChannel : function() {
             this._depth += this.depthChannelGap;
+            if (this._depth > this.camera.far) {
+                this.camera.far *= 2;
+                this.camera.update(true);
+            }
             return this._depth;
         },
         identity : function() {

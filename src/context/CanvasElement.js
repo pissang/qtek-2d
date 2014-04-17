@@ -4,7 +4,7 @@ define(function(require) {
     var CanvasElement = function() {
     };
 
-    var canvasElementMustImplementsMethods = ['hasFill', 'hasStroke', 'getHashKey', 'updateVertices'];
+    var canvasElementMustImplementsMethods = ['hasFill', 'hasStroke', 'getHashKey', 'updateVertices', 'afterDraw'];
     var primitiveMustImplementsMethods = ['updateElements', 'addElement', 'clearElements'];
 
     CanvasElement._factories = [];
