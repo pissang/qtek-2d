@@ -49,13 +49,13 @@ define(function(require) {
         var height = ctx.measureText('m').width;
         var lineHeight = height * 1.5;
 
-        if (width > this._canvas.width) {
+        if (width > this._canvas.width / windowsDevicePixelRatio) {
             console.warn('Text width no longer than ' + this._canvas.width);
         }
 
-        if (sx + width > this._canvas.width) {
+        if (sx + width > this._canvas.width / windowsDevicePixelRatio) {
             sx = 0;
-            if (sy + lineHeight > this._canvas.height) {
+            if (sy + lineHeight > this._canvas.height / windowsDevicePixelRatio) {
                 return null;
             } else {
                 sy += lineHeight;
@@ -126,6 +126,13 @@ define(function(require) {
         }
 
         return cImage;
+    }
+
+    ImageAtlas.prototype.measureText = function(ctx, text) {
+        var ctx = this._ctx2d;
+        ctx.font = _ctx.font;
+
+        return ctx.measureText(text);
     }
 
     ImageAtlas.prototype.addImage = function() {

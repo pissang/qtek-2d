@@ -29,10 +29,14 @@ void main()
     #endif
 
     if (d1 > d2) {
-        gl_FragColor = c1 * (1.0 - c2.a) + c2 * c2.a;
+        gl_FragColor.rgb = c1.rgb * (1.0 - c2.a) + c2.rgb;
     } else {
-        gl_FragColor = c2 * (1.0 - c1.a) + c1 * c1.a;
+        gl_FragColor.rgb = c2.rgb * (1.0 - c1.a) + c1.rgb;
     }
+    gl_FragColor.a = c1.a + c2.a - c1.a *c2.a;
+
+    // TODO premultiplied alpha in renderer?
+    gl_FragColor.rgb /= gl_FragColor.a;
 }
 
 @end

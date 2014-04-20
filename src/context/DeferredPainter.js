@@ -84,8 +84,8 @@ define(function(require) {
                     ctx.renderer.renderQueue(this._imagePrimitives, ctx.camera);
                 }
             } else {
-                // var useDepthTexture = glinfo.getExtension(_gl, 'WEBGL_depth_texture');
-                var useDepthTexture = false;
+                var useDepthTexture = glinfo.getExtension(_gl, 'WEBGL_depth_texture');
+                // var useDepthTexture = false;
 
                 this._pathColorTexture = this._checkTexture(this._pathColorTexture, ctx);
                 this._pathDepthTexture = this._checkTexture(this._pathDepthTexture, ctx);
@@ -109,8 +109,8 @@ define(function(require) {
                 _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
                 ctx.renderer.renderQueue(this._pathPrimitives, ctx.camera);
                 if (!useDepthTexture) {
-                    _gl.depthFunc(_gl.LEQUAL);
                     this.frameBuffer.attach(_gl, this._pathDepthTexture);
+                    _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
                     ctx.renderer.renderQueue(this._pathPrimitives, ctx.camera, depthMaterial);
                 }
 
@@ -124,29 +124,33 @@ define(function(require) {
 
                 if (!useDepthTexture) {
                     this.frameBuffer.attach(_gl, this._imageDepthTexture);
+                    _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
                     ctx.renderer.renderQueue(this._imagePrimitives, ctx.camera, depthMaterial);
-
-                    _gl.depthFunc(_gl.LESS);
                 }
 
                 this.frameBuffer.unbind(ctx.renderer);
 
                 _gl.depthMask(false);
+                _gl.disable(_gl.DEPTH_TEST)
                 blendPass.setUniform('color1', this._pathColorTexture);
                 blendPass.setUniform('depth1', this._pathDepthTexture);
                 blendPass.setUniform('color2', this._imageColorTexture);
                 blendPass.setUniform('depth2', this._imageDepthTexture);
+                blendPass.material.transparent = true;
                 if (useDepthTexture) {
                     blendPass.material.shader.unDefine('fragment', 'DEPTH_DECODE')
                 } else {
                     blendPass.material.shader.define('fragment', 'DEPTH_DECODE')
                 }
+                ctx.renderer.clear = 0;
                 blendPass.render(ctx.renderer);
+                ctx.renderer.clear = _gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT;
             }
-            
+
             // FRESH all elements after draw
             for (var i = 0; i < this._elements.length; i++) {
-                this._elements[i].afterDraw();
+                // TODO After draw is strangely slow
+                // this._elements[i].afterDraw();
             }
         },
 
@@ -162,7 +166,9 @@ define(function(require) {
 
                 texture = new Texture2D({
                     width : ctx.renderer.width,
-                    height : ctx.renderer.height
+                    height : ctx.renderer.height,
+                    minFilter : ctx.renderer.gl.NEAREST,
+                    magFilter : ctx.renderer.gl.NEAREST
                 });
             }
             return texture;

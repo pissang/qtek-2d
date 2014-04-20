@@ -55,12 +55,17 @@ void main()
         float sd = c / sqrt(cx * cx + cy * cy);
 
         float alpha = clamp(0.5 - sd, 0.0, 1.0);
+
     #else
         float alpha = step(v_klm.x * v_klm.x * v_klm.x, v_klm.y * v_klm.z);
     #endif
 
     gl_FragColor = v_Color;
     gl_FragColor.a *= alpha;
+
+    if (gl_FragColor.a < 1e-3) {
+        discard;
+    }
 }
 
 @end

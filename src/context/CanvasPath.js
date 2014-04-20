@@ -520,7 +520,7 @@ define(function(require) {
             }
         },
 
-        clone : function() {
+        clone : function(ctx) {
             var path = new CanvasPath();
 
             if (!(this._fill || this._stroke)) {
@@ -531,7 +531,7 @@ define(function(require) {
             path._fill = this._fill;
             path._stroke = this._stroke;
 
-            path.depth = this.depth;
+            path.depth = ctx.requestDepthChannel();
             
             path.drawingStyle.copy(this.drawingStyle);
             path.transform.copy(this.transform);

@@ -48,7 +48,8 @@ define(function(require) {
 
         if (this.canvas && !this.renderer) {
             this.renderer = new Renderer({
-                canvas : this.canvas
+                canvas : this.canvas,
+                devicePixelRatio : 1
             });
         }
 
@@ -249,7 +250,12 @@ define(function(require) {
             return cImage;
         },
 
-        measureText : function() {},
+        measureText : function(text) {
+            if (!this._textAtlas) {
+                this._textAtlas = this._painter.getNewTextAtlas();
+            }
+            return this._textAtlas.measureText(text);
+        },
 
         /******************
          * Rectangles
@@ -341,6 +347,12 @@ define(function(require) {
 
             return painter;
         },
+
+        setPainter : function(painter) {
+            this._textAtlas = null;
+            this._painter = painter;
+        },
+
         addPath : function(path) {
             if (this._painter) {
                 this._painter.addElement(path);
