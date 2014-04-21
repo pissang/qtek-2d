@@ -205,6 +205,10 @@ define(function(require) {
 
         },
 
+        dispose : function() {
+            this.begin();
+        },
+
         _disposePrimitive : function(primitive) {
             primitive.geometry.dispose(this._gl);
         },

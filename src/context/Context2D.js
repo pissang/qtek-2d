@@ -337,20 +337,28 @@ define(function(require) {
         /******************
          * Extend methods
          *****************/
-        beginDraw : function(painter) {
+        beginDraw : function(painter, painterType) {
             if (!painter) {
-                painter = new DeferredPainter();
+                if (painterType == 'deferred') {
+                    painter = new DeferredPainter();
+                } else {
+                    painter = new Painter();
+                }
             }
-            painter.begin();
-            this._painter = painter;
-            this._textAtlas = null;
+            this.setPainter(painter);
 
             return painter;
         },
 
         setPainter : function(painter) {
-            this._textAtlas = null;
-            this._painter = painter;
+            if (this._painter !== painter) {
+                if (this._painter) {
+                    this._painter.end();
+                }
+                this._textAtlas = null;
+                this._painter = painter;
+                painter.begin();   
+            }
         },
 
         addPath : function(path) {
