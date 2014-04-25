@@ -132,7 +132,7 @@ define(function(require) {
             if (y1 > bb[1][1]) bb[1][1] = y1;
 
             // Make the bounding box a litte bigger
-            // Or the geometry hashing will touch the bound of the bounding box
+            // Avoid the geometry hashing will touching the bound of the bounding box
             bb[0][0] -= 0.1;
             bb[0][1] -= 0.1;
             bb[1][0] += 0.1;

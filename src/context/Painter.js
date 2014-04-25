@@ -4,6 +4,8 @@ define(function(require) {
 
     var Base = require('qtek/core/Base');
     var Shader = require('qtek/Shader');
+    var Matrix2d = require('qtek/math/Matrix2d');
+    var Matrix4 = require('qtek/math/Matrix4');
 
     var CachedList = require('./tool/CachedList');
     var CanvasElement = require('./CanvasElement');
@@ -14,10 +16,11 @@ define(function(require) {
     var CanvasImage = require('./CanvasImage');
     var ImageAtlas = require('./tool/ImageAtlas');
 
+
     var Painter = Base.derive(function() {
-        
         return {
-        
+            transform : new Matrix2d(),
+
             _elements : [],
 
             _primitives : [],
@@ -31,7 +34,6 @@ define(function(require) {
 
             _gl : null
         }
-        
     }, function() {
         
         var nFactory = CanvasElement.getClassNumber();
@@ -66,6 +68,11 @@ define(function(require) {
             } else {
                 _gl.disable(_gl.BLEND);
             }
+
+            for (var i = 0; i < this._primitives.length; i++) {
+                Matrix4.fromMat2d(this._primitives[i].worldTransform, this.transform);
+            }
+
             ctx.renderer.renderQueue(this._primitives, ctx.camera);
 
             // FRESH all elements after draw

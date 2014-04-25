@@ -10,6 +10,8 @@ define(function(require) {
     var FrameBuffer = require('qtek/FrameBuffer');
     var glinfo = require('qtek/core/glinfo');
     var Texture2D = require('qtek/texture/Texture2D');
+    var Matrix2d = require('qtek/math/Matrix2d');
+    var Matrix4 = require('qtek/math/Matrix4');
 
     var CachedList = require('./tool/CachedList');
 
@@ -40,6 +42,8 @@ define(function(require) {
 
     var DeferredPainter = Base.derive(function() {
         return {
+            transform : new Matrix2d(),
+
             _gl : null,
 
             _elements : [],
@@ -75,6 +79,13 @@ define(function(require) {
 
             _gl.depthMask(true);
             _gl.enable(_gl.BLEND);
+
+            for (var i = 0; i < this._pathPrimitives.length; i++) {
+                Matrix4.fromMat2d(this._pathPrimitives[i].worldTransform, this.transform);
+            }
+            for (var i = 0; i < this._imagePrimitives.length; i++) {
+                Matrix4.fromMat2d(this._imagePrimitives[i].worldTransform, this.transform);
+            }
 
             if (this._pathPrimitives.length == 0 || this._imagePrimitives.length == 0) {
                 if (this._pathPrimitives.length > 0) {
@@ -136,6 +147,8 @@ define(function(require) {
                 blendPass.setUniform('depth1', this._pathDepthTexture);
                 blendPass.setUniform('color2', this._imageColorTexture);
                 blendPass.setUniform('depth2', this._imageDepthTexture);
+                blendPass.material.depthTest = false;
+                blendPass.material.depthMask = false;
                 blendPass.material.transparent = true;
                 if (useDepthTexture) {
                     blendPass.material.shader.unDefine('fragment', 'DEPTH_DECODE')
@@ -150,7 +163,7 @@ define(function(require) {
             // FRESH all elements after draw
             for (var i = 0; i < this._elements.length; i++) {
                 // TODO After draw is strangely slow
-                // this._elements[i].afterDraw();
+                this._elements[i].afterDraw();
             }
         },
 

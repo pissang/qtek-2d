@@ -23,7 +23,7 @@
             image.onload = function() {
                 var start = performance.now();
                 console.profile('render')
-                var painter = ctx.beginDraw();
+                var painter = ctx.beginDraw(null, 'deferred');
                 for (var i = 0; i < 100; i++) {
                     ctx.drawImage(image, Math.random() * 1000, Math.random() * 600, 50, 50);
                     ctx.beginPath();

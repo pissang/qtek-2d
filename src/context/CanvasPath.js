@@ -512,10 +512,10 @@ define(function(require) {
             this._fillColorChanged = false;
             this._strokeColorChanged = false;
 
-            if (this._verticesData.fill) {
+            if (this._fill) {
                 this._verticesData.fill.dirty = false;
             }
-            if (this._verticesData.stroke) {
+            if (this._stroke) {
                 this._verticesData.stroke.dirty = false;
             }
         },

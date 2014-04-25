@@ -36,9 +36,9 @@ define(function() {
         },
 
         isPointInTriangle : function(x0, y0, x1, y1, x2, y2, xi, yi) {
-            return mathTool.isTriangleConvex(x0, y0, xi, yi, x2, y2)
-                && mathTool.isTriangleConvex(x1, y1, xi, yi, x0, y0)
-                && mathTool.isTriangleConvex(x1, y1, x2, y2, xi, yi);
+            return !(mathTool.triangleArea(x0, y0, x2, y2, xi, yi) <= 0
+                || mathTool.triangleArea(x0, y0, xi, yi, x1, y1) <= 0
+                || mathTool.triangleArea(xi, yi, x2, y2, x1, y1) <= 0);
         },
 
         // PENDING
@@ -63,7 +63,6 @@ define(function() {
 
             return points;
         }
-
     }
 
     return mathTool;

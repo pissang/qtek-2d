@@ -20,9 +20,9 @@ define(function(require) {
 
     var CanvasSubpath = function() {
 
-        this.basePolygon = new Polygon();
+        this.basePolygon = new Polygon(true);
 
-        this.interiorPolygon = new Polygon();
+        this.interiorPolygon = new Polygon(true);
 
         // Seperate the fill segments and stroke segments
         // because curve segment may be subdivided
@@ -43,9 +43,7 @@ define(function(require) {
         this._isClosed = false;
 
         this._isEnded = false;
-        // TODO
-        // this._boundingBox = [[-Infinity, -Infinity], [Infinity, Infinity]];
-        
+
         this._fill = true;
         this._stroke = false;
 
@@ -76,6 +74,7 @@ define(function(require) {
 
         this._isEnded = true;
 
+        this.basePolygon.end();
         var area = this.basePolygon.area();
         if (area > 0) {
             this.reverse();
@@ -198,6 +197,14 @@ define(function(require) {
         this.fillCurveSegments[this._nFillCurveSegements++] = seg;
 
         return isClosed;
+    }
+
+    CanvasSubpath.prototype.isPointInSubpath = function(x, y) {
+        var bbox = this.interiorPolygon.boundingBox;
+        if (bbox[0][0] > x || bbox[1][0] < x || bbox[0][1] > y || bbox[1][1] < y) {
+            return false;
+        }
+        
     }
 
     // Return true if the subpath is closed

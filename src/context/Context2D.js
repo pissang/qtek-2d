@@ -49,7 +49,8 @@ define(function(require) {
         if (this.canvas && !this.renderer) {
             this.renderer = new Renderer({
                 canvas : this.canvas,
-                devicePixelRatio : 1
+                // TODO
+                // devicePixelRatio : 1
             });
         }
 
@@ -417,6 +418,7 @@ define(function(require) {
             this._depth += this.depthChannelGap;
             if (this._depth > this.camera.far) {
                 this.camera.far *= 2;
+                this.camera.position.z = this.camera.far;
                 this.camera.update(true);
             }
             return this._depth;
