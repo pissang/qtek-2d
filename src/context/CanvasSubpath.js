@@ -46,7 +46,6 @@ define(function(require) {
 
         this._fill = true;
         this._stroke = false;
-
     }
 
     CanvasSubpath.prototype.begin = function(x, y) {
@@ -601,6 +600,16 @@ define(function(require) {
         for (var i = 0; i < this._nStrokeSegments; i++) {
             this.strokeSegments[i].reverse();
         }
+    }
+
+    CanvasSubpath.prototype.staticize = function() {
+        this.basePolygon.staticize();
+        this.interiorPolygon.staticize();
+
+        // Clear fill segements
+        // PENDING
+        // fillCurveSegements and strokeSegements may still be used later
+        this.fillSegments.length = 0;
     }
 
 

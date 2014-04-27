@@ -32,6 +32,8 @@ define(function(require) {
 
             _blending : true,
 
+            _blendFunc : null,
+
             _gl : null
         }
     }, function() {
@@ -71,6 +73,12 @@ define(function(require) {
 
             for (var i = 0; i < this._primitives.length; i++) {
                 Matrix4.fromMat2d(this._primitives[i].worldTransform, this.transform);
+
+                if (this._blending && this._blendFunc) {
+                    this._primitives[i].material.blend = this._blendFunc;
+                } else {
+                    this._primitives[i].material.blend = null;
+                }
             }
 
             ctx.renderer.renderQueue(this._primitives, ctx.camera);
@@ -95,6 +103,10 @@ define(function(require) {
 
         disableBlending : function() {
             this._blending = false;
+        },
+
+        setBlendFunc : function(func) {
+            this._blendFunc = func;
         },
 
         begin : function() {

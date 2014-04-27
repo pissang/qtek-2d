@@ -33,13 +33,21 @@ define(function (require) {
         } else {
             this.boundingBox = null;
         }
+
+        this._isStatic = false;
     }
 
     Polygon.prototype.begin = function(x, y) {
-        
+        if (this._isStatic) {
+            this._isStatic = false;
+            this.points = [];
+            this.triangles = [];
+        }
+
         this._nPoints = 0;
         this._isClosed = false;
         this._isEnded = false;
+
 
         this.addPoint(x, y);
 
@@ -162,7 +170,16 @@ define(function (require) {
         if (bbox[0][0] > x || bbox[1][0] < x || bbox[0][1] > y || bbox[1][1] < y) {
             return false;
         }
-        
+
+    }
+
+    Polygon.prototype.staticize = function() {
+        if (this._isStatic) {
+            return;
+        }
+        this.points = new Float32Array(this.points);
+        this.triangles = new Uint32Array(this.triangles);
+        this._isStatic = true;
     }
 
     // Reverse the orientation

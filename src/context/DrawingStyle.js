@@ -29,12 +29,17 @@ define(function(require) {
 
 
     DrawingStyle.prototype.setStrokeStyle = function(str) {
-        var c = color.parse(str);
+        if (typeof(str) == 'string') {
+            var c = color.parse(str);
+        } else if (str.length == 3 || str.length == 4) {
+            c = str;
+        }
+
         if (c) {
             this.strokeStyle[0] = c[0] / 255;
             this.strokeStyle[1] = c[1] / 255;
             this.strokeStyle[2] = c[2] / 255;
-            this.strokeStyle[3] = c[3];
+            this.strokeStyle[3] = c[3] || 1;
         } else {
             this.strokeStyle[0] = 0;
             this.strokeStyle[1] = 0;
@@ -44,12 +49,17 @@ define(function(require) {
     }
 
     DrawingStyle.prototype.setFillStyle = function(str) {
-        var c = color.parse(str);
+        var c;
+        if (typeof(str) == 'string') {
+            c = color.parse(str);
+        } else if (str.length == 3 || str.length == 4) {
+            c = str;
+        }
         if (c) {
             this.fillStyle[0] = c[0] / 255;
             this.fillStyle[1] = c[1] / 255;
             this.fillStyle[2] = c[2] / 255;
-            this.fillStyle[3] = c[3];
+            this.fillStyle[3] = c[3] || 1;
         } else {
             this.fillStyle[0] = 0;
             this.fillStyle[1] = 0;

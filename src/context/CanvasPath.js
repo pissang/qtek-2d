@@ -99,6 +99,12 @@ define(function(require) {
             this._strokeColorChanged = true;
         },
 
+        setGlobalAlpha : function(alpha) {
+            this.drawingStyle.globalAlpha = alpha;
+            this._strokeColorChanged = true;
+            this._fillColorChanged = true;
+        },
+
         moveTo : function(x, y) {
             if (this._subpath) {
                 this._endSubpath();
@@ -549,6 +555,15 @@ define(function(require) {
             }
 
             return path;
+        },
+
+        staticize : function() {
+            var subpaths = this.subpaths.data();
+            var nSubpaths = this.subpaths.size();
+
+            for (var i = 0; i < nSubpaths; i++) {
+                subpaths[i].staticize();
+            }
         },
 
         _endSubpath : function() {

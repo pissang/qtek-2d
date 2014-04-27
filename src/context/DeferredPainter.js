@@ -65,7 +65,9 @@ define(function(require) {
             _imageColorTexture : null,
             _imageDepthTexture : null,
 
-            frameBuffer : new FrameBuffer()
+            frameBuffer : new FrameBuffer(),
+
+            _blendFunc : null
         }
     }, {
 
@@ -82,9 +84,11 @@ define(function(require) {
 
             for (var i = 0; i < this._pathPrimitives.length; i++) {
                 Matrix4.fromMat2d(this._pathPrimitives[i].worldTransform, this.transform);
+                this._pathPrimitives[i].material.blend = this._blendFunc;
             }
             for (var i = 0; i < this._imagePrimitives.length; i++) {
                 Matrix4.fromMat2d(this._imagePrimitives[i].worldTransform, this.transform);
+                this._imagePrimitives[i].material.blend = this._blendFunc;
             }
 
             if (this._pathPrimitives.length == 0 || this._imagePrimitives.length == 0) {
@@ -196,6 +200,10 @@ define(function(require) {
             }
 
             this.draw(ctx);
+        },
+
+        setBlendFunc : function(func) {
+            this._blendFunc = func;
         },
 
         begin : function() {
