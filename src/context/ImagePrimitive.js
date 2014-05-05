@@ -21,7 +21,7 @@ define(function(require) {
     });
     imageShader.enableTexture('sprite');
 
-    var ImageFillPrimitive = Primitive.derive(function() {
+    var ImagePrimitive = Primitive.derive(function() {
         return {
             geometry : new Geometry2D({
                 attributes : {
@@ -124,7 +124,7 @@ define(function(require) {
         }
     });
 
-    CanvasElement.setFillPrimitiveClass(CanvasImage.eType, ImageFillPrimitive);
+    CanvasElement.setPrimitiveClass(CanvasImage.eType, ImagePrimitive);
 
-    return ImageFillPrimitive;
+    return ImagePrimitive;
 })

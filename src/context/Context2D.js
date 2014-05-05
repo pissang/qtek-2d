@@ -40,7 +40,10 @@ define(function(require) {
 
         _textAtlas : null,
 
-        _depth : 1
+        _depth : 1,
+
+        _prevCanvasWidth: 0,
+        _prevCanvasHeight: 0,
 
     }, function() {
         var width = this.canvas.width;

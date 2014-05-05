@@ -13,12 +13,12 @@ define(function(require) {
     Shader.import(require('text!./shader/path.essl'));
 
     var pathShader = new Shader({
-        vertex : Shader.source('buildin.2d.path.fill.vertex'),
-        fragment : Shader.source('buildin.2d.path.fill.fragment')
+        vertex : Shader.source('buildin.2d.path.vertex'),
+        fragment : Shader.source('buildin.2d.path.fragment')
     });
     pathShader.define('fragment', 'ANTIALIASING');
 
-    var PathFillPrimitive = Primitive.derive(function() {
+    var PathPrimitive = Primitive.derive(function() {
         return {
             geometry : new Geometry2D({
                 attributes : {
@@ -61,7 +61,13 @@ define(function(require) {
 
             var nVertices = 0;
             for (var i = 0; i < this._paths.length; i++) {
-                nVertices += this._paths[i].getFillVertexNumber();
+                var path = this._paths[i];
+                if (path.hasFill()) {
+                    nVertices += this._paths[i].getFillVertexNumber();
+                }
+                if (path.hasStroke()) {
+                    nVertices += this._paths[i].getStrokeVertexNumber();
+                }
             }
 
             var needsUpdateAll = this._needsUpdateAll;
@@ -83,38 +89,85 @@ define(function(require) {
             var t1Arr = geo.attributes.t1.value;
             var colorArr = geo.attributes.color.value;
             var positionArr = geo.attributes.position.value;
+            var coordArr = geo.attributes.coord.value;
 
             for (var i = 0; i < this._paths.length; i++) {
                 var path = this._paths[i];
-                var nPathVertices = path.getFillVertexNumber();
                 var mat = path.transform._array;
                 var z = path.depth;
+                var alpha = path.drawingStyle.globalAlpha;
 
-                var data = path.getFillVertices();
-                if (data.dirty || needsUpdateAll) {
-                    geo.attributes.coord.value.set(data.coord, offset3);
-                    positionArr.set(data.position, offset3);
-                }
-                // Update z
-                for (var k = offset3 + 2; k < data.position.length + offset3; k += 3) {
-                    positionArr[k] = z;
-                }
-
-                if (path._fillColorChanged || needsUpdateAll) {
-                    var color = path.drawingStyle.fillStyle;
-                    var alpha = path.drawingStyle.globalAlpha;
-                    for (var k = 0; k < nPathVertices; k++) {
-                        // Set fill style
-                        colorArr[offset4++] = color[0];
-                        colorArr[offset4++] = color[1];
-                        colorArr[offset4++] = color[2];
-                        colorArr[offset4++] = color[3] * alpha;
+                var nFillVertices = 0;
+                var nStrokeVertices = 0;
+                // -------
+                // Fill
+                if (path.hasFill()) {
+                    nFillVertices = path.getFillVertexNumber();
+                    var data = path.getFillVertices();
+                    if (data.dirty || needsUpdateAll) {
+                        coordArr.set(data.coord, offset3);
+                        positionArr.set(data.position, offset3);
                     }
-                } else {
-                    offset4 += nPathVertices * 4;
+                    // Update z
+                    for (var k = offset3 + 2; k < nFillVertices * 3 + offset3; k += 3) {
+                        positionArr[k] = z;
+                    }
+
+                    if (path._fillColorChanged || needsUpdateAll) {
+                        var color = path.drawingStyle.fillStyle;
+                        for (var k = 0; k < nFillVertices; k++) {
+                            // Set fill style
+                            colorArr[offset4++] = color[0];
+                            colorArr[offset4++] = color[1];
+                            colorArr[offset4++] = color[2];
+                            colorArr[offset4++] = color[3] * alpha;
+                        }
+                    } else {
+                        offset4 += nFillVertices * 4;
+                    }
+
+                    offset3 += nFillVertices * 3;
                 }
+
+                // -------
+                // Stroke
+                if (path.hasStroke()) {
+                    nStrokeVertices = path.getStrokeVertexNumber();
+                    var data = path.getStrokeVertices();
+                    if (data.dirty || needsUpdateAll) {
+                        positionArr.set(data.position, offset3);
+                    }
+                    if (needsUpdateAll) {
+                        for (var k = offset3; k < offset3 + nStrokeVertices * 3;) {
+                            coordArr[k++] = 0;
+                            coordArr[k++] = 1;
+                            coordArr[k++] = 1;
+                        }
+                    }
+                    // Update z
+                    for (var k = offset3 + 2; k < offset3 + nStrokeVertices * 3; k += 3) {
+                        positionArr[k] = z + 0.002;
+                    }
+
+                    if (path._strokeColorChanged || needsUpdateAll) {
+                        var color = path.drawingStyle.strokeStyle;
+                        for (var k = 0; k < nStrokeVertices; k++) {
+                            // Set fill style
+                            colorArr[offset4++] = color[0];
+                            colorArr[offset4++] = color[1];
+                            colorArr[offset4++] = color[2];
+                            colorArr[offset4++] = color[3] * alpha;
+                        }
+                    } else {
+                        offset4 += nStrokeVertices * 4;
+                    }
+                }
+                
+                offset3 -= nFillVertices * 3;
+                // -----
+                // Transform
                 if (path.transform._dirty || needsUpdateAll) {
-                    for (var k = 0; k < nPathVertices; k++) {
+                    for (var k = 0; k < nFillVertices + nStrokeVertices; k++) {
                         // Set t0
                         t0Arr[offset3] = mat[0];
                         t0Arr[offset3 + 1] = mat[2];
@@ -127,7 +180,7 @@ define(function(require) {
                         offset3 += 3;
                     }
                 } else {
-                    offset3 += nPathVertices * 3;
+                    offset3 += (nFillVertices + nStrokeVertices) * 3;
                 }
             }
 
@@ -137,7 +190,7 @@ define(function(require) {
         }
     });
 
-    CanvasElement.setFillPrimitiveClass(CanvasPath.eType, PathFillPrimitive);
+    CanvasElement.setPrimitiveClass(CanvasPath.eType, PathPrimitive);
 
-    return PathFillPrimitive;
+    return PathPrimitive;
 });

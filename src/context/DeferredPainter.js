@@ -15,11 +15,9 @@ define(function(require) {
 
     var CachedList = require('./tool/CachedList');
 
-    var CachedList = require('./tool/CachedList');
     var CanvasElement = require('./CanvasElement');
-    var PathFillPrimitive = require('./PathFillPrimitive');
-    var PathStrokePrimitive = require('./PathStrokePrimitive');
-    var ImageFillPrimitive = require('./ImageFillPrimitive');
+    var PathPrimitive = require('./PathPrimitive');
+    var ImagePrimitive = require('./ImagePrimitive');
     var CanvasPath  = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
     var ImageAtlas = require('./tool/ImageAtlas');
@@ -54,10 +52,9 @@ define(function(require) {
 
             _textAtlas : new CachedList(ImageAtlas, 2),
 
-            _imageFillPrimitiveList: new CachedList(ImageFillPrimitive),
+            _imagePrimitiveList: new CachedList(ImagePrimitive),
 
-            _pathFillPrimitiveList: new CachedList(PathFillPrimitive, 2),
-            _pathStrokePrimitiveList: new CachedList(PathStrokePrimitive, 2),
+            _pathPrimitiveList: new CachedList(PathPrimitive, 2),
 
             _pathColorTexture : null,
             _pathDepthTexture : null,
@@ -219,17 +216,15 @@ define(function(require) {
             this._pathPrimitives.length = 0;
             this._elements.length = 0;
 
-            this._imageFillPrimitiveList.clear(this._disposePrimitive);
-            this._pathFillPrimitiveList.clear(this._disposePrimitive);
-            this._pathStrokePrimitiveList.clear(this._disposePrimitive);
+            this._imagePrimitiveList.clear(this._disposePrimitive);
+            this._pathPrimitiveList.clear(this._disposePrimitive);
         },
 
         end : function() {
             // this._elements.sort(this._eleDepthSortFunc);
 
-            var pathFillPrimitive;
-            var pathStrokePrimitive;
-            var imageFillPrimitive;
+            var pathPrimitive;
+            var imagePrimitive;
             var imageHashKey = null;
             for (var i = 0; i < this._elements.length; i++) {
                 var el = this._elements[i];
@@ -239,26 +234,17 @@ define(function(require) {
                         var key = el.getHashKey();
                         if (imageHashKey !== key) {
                             imageHashKey = key;
-                            imageFillPrimitive = this._imageFillPrimitiveList.increase();
-                            this._imagePrimitives.push(imageFillPrimitive);
+                            imagePrimitive = this._imagePrimitiveList.increase();
+                            this._imagePrimitives.push(imagePrimitive);
                         }
-                        imageFillPrimitive.addElement(el);
+                        imagePrimitive.addElement(el);
                         break;
                     case CanvasPath.eType:
-                        if (el.hasFill()) {
-                            if (!pathFillPrimitive) {
-                                pathFillPrimitive = this._pathFillPrimitiveList.increase();
-                                this._pathPrimitives.push(pathFillPrimitive);
-                            }
-                            pathFillPrimitive.addElement(el);
+                        if (!pathPrimitive) {
+                            pathPrimitive = this._pathPrimitiveList.increase();
+                            this._pathPrimitives.push(pathPrimitive);
                         }
-                        if (el.hasStroke()) {
-                            if (!pathStrokePrimitive) {
-                                pathStrokePrimitive = this._pathStrokePrimitiveList.increase();
-                                this._pathPrimitives.push(pathStrokePrimitive);
-                            }
-                            pathStrokePrimitive.addElement(el);
-                        }
+                        pathPrimitive.addElement(el);
                         break;
                     default:
                         console.warn('Deferred painter only support CanvasImage and CanvasPath');

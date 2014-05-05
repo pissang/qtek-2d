@@ -10,22 +10,18 @@ define(function(require) {
     CanvasElement._factories = [];
     var _factories = CanvasElement._factories;
 
-    CanvasElement.register = function(elClass, fillPrimClass, strokePrimClass) {
+    CanvasElement.register = function(elClass, primClass) {
         if (elClass && !CanvasElement._checkElementClass(elClass)) {
             return;
         }
-        if (fillPrimClass && !CanvasElement._checkPrimitiveClass(fillPrimClass)) {
-            return;
-        }
-        if (strokePrimClass && !CanvasElement._checkPrimitiveClass(strokePrimClass)) {
+        if (primClass && !CanvasElement._checkPrimitiveClass(primClass)) {
             return;
         }
 
         var eType = _factories.length;
         _factories.push({
             fElement : elClass,
-            fFillPrimitive : fillPrimClass,
-            fStrokePrimitive : strokePrimClass
+            fPrimitive : primClass
         });
 
         return eType;
@@ -55,26 +51,16 @@ define(function(require) {
         return result;
     }
 
-    CanvasElement.setFillPrimitiveClass = function(eType, primClass) {
+    CanvasElement.setPrimitiveClass = function(eType, primClass) {
         if (!CanvasElement._checkPrimitiveClass(primClass)) {
             return;
         }
         var item = _factories[eType]
         if (item) {
-            item.fFillPrimitive = primClass;
+            item.fPrimitive = primClass;
         }
     }
     
-    CanvasElement.setStrokePrimitiveClass = function(eType, primClass) {
-        if (!CanvasElement._checkPrimitiveClass(primClass)) {
-            return;
-        }
-        var item = _factories[eType]
-        if (item) {
-            item.fStrokePrimitive = primClass;
-        }
-    }
-
     CanvasElement.setElementClass = function(eType, elClass) {
         if (!CanvasElement._checkElementClass(elClass)) {
             return;
@@ -85,17 +71,10 @@ define(function(require) {
         }
     }
 
-    CanvasElement.getFillPrimitiveClass = function(eType) {
+    CanvasElement.getPrimitiveClass = function(eType) {
         var item = _factories[eType];
         if (item) {
-            return item.fFillPrimitive;
-        }
-    }
-
-    CanvasElement.getStrokePrimitiveClass = function(eType) {
-        var item = _factories[eType];
-        if (item) {
-            return item.fStrokePrimitive;
+            return item.fPrimitive;
         }
     }
 
@@ -113,17 +92,10 @@ define(function(require) {
         }
     }
 
-    CanvasElement.createFillPrimitive = function(eType) {
+    CanvasElement.createPrimitive = function(eType) {
         var item = _factories[eType];
         if (item) {
-            return new item.fFillPrimitive();
-        }
-    }
-
-    CanvasElement.createStrokePrimitive = function(eType) {
-        var item = _factories[eType];
-        if (item) {
-            return new item.fStrokePrimitive();
+            return new item.fPrimitive();
         }
     }
 

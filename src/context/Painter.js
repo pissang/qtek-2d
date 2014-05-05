@@ -9,13 +9,11 @@ define(function(require) {
 
     var CachedList = require('./tool/CachedList');
     var CanvasElement = require('./CanvasElement');
-    var PathFillPrimitive = require('./PathFillPrimitive');
-    var PathStrokePrimitive = require('./PathStrokePrimitive');
-    var ImageFillPrimitive = require('./ImageFillPrimitive');
+    var PathPrimitive = require('./PathPrimitive');
+    var ImagePrimitive = require('./ImagePrimitive');
     var CanvasPath  = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
     var ImageAtlas = require('./tool/ImageAtlas');
-
 
     var Painter = Base.derive(function() {
         return {
@@ -25,8 +23,7 @@ define(function(require) {
 
             _primitives : [],
 
-            _fillPrimitiveLists : [],
-            _strokePrimitiveLists : [],
+            _primitiveLists : [],
 
             _textAtlas : new CachedList(ImageAtlas, 2),
 
@@ -41,17 +38,11 @@ define(function(require) {
         var nFactory = CanvasElement.getClassNumber();
 
         for (var i = 0; i < nFactory; i++) {
-            var FillPrimitive = CanvasElement.getFillPrimitiveClass(i);
-            var StrokePrimitive = CanvasElement.getStrokePrimitiveClass(i);
-            if (FillPrimitive) {
-                this._fillPrimitiveLists.push(new CachedList(FillPrimitive, 5));
+            var Primitive = CanvasElement.getPrimitiveClass(i);
+            if (Primitive) {
+                this._primitiveLists.push(new CachedList(Primitive, 5));
             } else {
-                this._fillPrimitiveLists.push(null);
-            }
-            if (StrokePrimitive) {
-                this._strokePrimitiveLists.push(new CachedList(StrokePrimitive, 5));
-            } else {
-                this._strokePrimitiveLists.push(null);
+                this._primitiveLists.push(null);
             }
         } 
 
@@ -118,14 +109,9 @@ define(function(require) {
             }
             this._primitives.length = 0;
             this._elements.length = 0;
-            for (var i = 0; i < this._fillPrimitiveLists.length; i++) {
-                if (this._fillPrimitiveLists[i]) {
-                    this._fillPrimitiveLists[i].clear(this._disposePrimitive);
-                }
-            }
-            for (var i = 0; i < this._strokePrimitiveLists.length; i++) {
-                if (this._strokePrimitiveLists[i]) {
-                    this._strokePrimitiveLists[i].clear(this._disposePrimitive);
+            for (var i = 0; i < this._primitiveLists.length; i++) {
+                if (this._primitiveLists[i]) {
+                    this._primitiveLists[i].clear(this._disposePrimitive);
                 }
             }
         },
@@ -134,43 +120,25 @@ define(function(require) {
             if (this._blending) {
                 // this._elements.sort(this._eleDepthSortFunc);
                 var hashKey = null;
-                var fillPrimitive;
-                var strokePrimitive;
+                var primitive;
                 for (var i = 0; i < this._elements.length; i++) {
                     var el = this._elements[i];
                     var elHashKey = el.getHashKey();
                     if (el.getHashKey() != hashKey) {
-                        // Begin a new fillPrimitive
-                        var list = this._fillPrimitiveLists[el.eType];
+                        // Begin a new primitive
+                        var list = this._primitiveLists[el.eType];
                         if (list) {
-                            fillPrimitive = list.increase();
-                            fillPrimitive.clearElements();   
+                            primitive = list.increase();
+                            primitive.clearElements();   
                         }
-                        list = this._strokePrimitiveLists[el.eType];
-                        if (list) {
-                            strokePrimitive = list.increase();
-                            strokePrimitive.clearElements();   
-                        }
-                        // TODO 
-                        // If there is a transparent filled path upon the stroke
-                        // The stroked line still will be discarded because of depth test
-                        if (fillPrimitive) {
-                            this._primitives.push(fillPrimitive);
-                        }
-                        if (strokePrimitive) {
-                            this._primitives.push(strokePrimitive);
+                        if (primitive) {
+                            this._primitives.push(primitive);
                         }
 
                         hashKey = elHashKey;
                     }
-                    // If element is a path, add the path to the fill(stroke) primitive
-                    // if any of its subpath is filled(stroked)
-                    // Any detailed validation will be done in the primitive
-                    if (el.hasFill() && fillPrimitive) {
-                        fillPrimitive.addElement(el);
-                    }
-                    if (el.hasStroke() && strokePrimitive) {
-                        strokePrimitive.addElement(el);
+                    if (primitive) {
+                        primitive.addElement(el);
                     }
                 }
                 for (var i = 0; i < this._primitives.length; i++) {
@@ -178,30 +146,17 @@ define(function(require) {
                 }
             } else {
                 // TODO
-                for (var i = 0; i < this._fillPrimitiveLists.length; i++) {
-                    if (this._fillPrimitiveLists[i]) {
-                        var primitive = this._fillPrimitiveLists[i].increase();
-                        primitive.clearElements();
-                        this._primitives.push(primitive);
-                    }
-                }
-                for (var i = 0; i < this._strokePrimitiveLists.length; i++) {
-                    if (this._strokePrimitiveLists[i]) {
-                        var primitive = this._strokePrimitiveLists[i].increase();
+                for (var i = 0; i < this._primitiveLists.length; i++) {
+                    if (this._primitiveLists[i]) {
+                        var primitive = this._primitiveLists[i].increase();
                         primitive.clearElements();
                         this._primitives.push(primitive);
                     }
                 }
                 for (var i = 0; i < this._elements.length; i++) {
                     var el = this._elements[i];
-                    if (el.hasFill()) {
-                        var primitive = this._fillPrimitiveLists[el.eType].get(0);
-                        primitive.addElement(el);
-                    }
-                    if (el.hasStroke()) {
-                        var primitive = this._strokePrimitiveLists[el.eType].get(0);
-                        primitive.addElement(el);
-                    }
+                    var primitive = this._primitiveLists[el.eType].get(0);
+                    primitive.addElement(el);
                 }
                 for (var i = 0; i < this._primitives.length; i++) {
                     this._primitives[i].updateElements(true);
