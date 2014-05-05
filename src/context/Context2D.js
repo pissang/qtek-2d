@@ -40,11 +40,8 @@ define(function(require) {
 
         _textAtlas : null,
 
-        _depth : 1,
-
-        _prevCanvasWidth: 0,
-        _prevCanvasHeight: 0,
-
+        _depth : 1
+        
     }, function() {
         var width = this.canvas.width;
         var height = this.canvas.height;
@@ -428,6 +425,21 @@ define(function(require) {
         },
         identity : function() {
             mat2d.identity(this.currentTransform._array);
+        },
+        resize: function(width, height) {
+            this.renderer.resize(width, height);
+            width = this.renderer.width;
+            height = this.renderer.height;
+
+            this.camera.left = -width / 2;
+            this.camera.right = width / 2;
+            this.camera.top = height / 2;
+            this.camera.bottom = -height / 2;
+
+            this.camera.position.x = width / 2;
+            this.camera.position.y = height / 2;
+
+            this.camera.update(true);
         }
     });
 
