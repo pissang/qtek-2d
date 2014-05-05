@@ -4,7 +4,7 @@ define(function(require) {
 
     'use strict'
 
-    var LinkedList = require('./LinkedList');
+    var LinkedList = require('qtek/core/LinkedList');
     var mathTool = require('./math');
 
     var VERTEX_TYPE_CONVEX = 1;

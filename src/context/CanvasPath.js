@@ -489,7 +489,7 @@ define(function(require) {
                     positionArr[offset3] = vertices[i * 2];
                     positionArr[offset3 + 1] = vertices[i * 2 + 1];
                     // Add a offset to avoid z conflict
-                    positionArr[offset3 + 2] = z + 0.005;
+                    positionArr[offset3 + 2] = z + 0.002;
 
                     offset3 += 3;
                 }
@@ -557,12 +557,12 @@ define(function(require) {
             return path;
         },
 
-        staticize : function() {
+        toStatic : function() {
             var subpaths = this.subpaths.data();
             var nSubpaths = this.subpaths.size();
 
             for (var i = 0; i < nSubpaths; i++) {
-                subpaths[i].staticize();
+                subpaths[i].toStatic();
             }
         },
 

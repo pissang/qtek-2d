@@ -173,7 +173,7 @@ define(function (require) {
 
     }
 
-    Polygon.prototype.staticize = function() {
+    Polygon.prototype.toStatic = function() {
         if (this._isStatic) {
             return;
         }

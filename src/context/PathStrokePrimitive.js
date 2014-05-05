@@ -78,15 +78,21 @@ define(function(require) {
             var t0Arr = geo.attributes.t0.value;
             var t1Arr = geo.attributes.t1.value;
             var colorArr = geo.attributes.color.value;
+            var positionArr = geo.attributes.position.value;
             
             for (var i = 0; i < this._paths.length; i++) {
                 var path = this._paths[i];
                 var nPathVertices = path.getStrokeVertexNumber();
                 var mat = path.transform._array;
+                var z = path.depth;
                 
                 var data = path.getStrokeVertices();
                 if (path.dirty || needsUpdateAll) {
-                    geo.attributes.position.value.set(data.position, offset3);
+                    positionArr.set(data.position, offset3);
+                }
+                // Update z
+                for (var k = offset3 + 2; k < data.position.length + offset3; k += 3) {
+                    positionArr[k] = z + 0.002;
                 }
 
                 if (path._strokeColorChanged || needsUpdateAll) {

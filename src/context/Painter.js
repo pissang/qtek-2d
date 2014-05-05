@@ -132,7 +132,7 @@ define(function(require) {
 
         end : function() {
             if (this._blending) {
-                this._elements.sort(this._eleDepthSortFunc);
+                // this._elements.sort(this._eleDepthSortFunc);
                 var hashKey = null;
                 var fillPrimitive;
                 var strokePrimitive;

@@ -6,7 +6,7 @@ define(function(require) {
     'use strict'
 
     var SplayTree = require('./SplayTree');
-    var LinkedList = require('./LinkedList');
+    var LinkedList = require('qtek/core/LinkedList');
     /****************************
      * Monotone polygon triangulate
      * js port of Poly2Tri(http://sites-final.uclouvain.be/mema/Poly2Tri/)

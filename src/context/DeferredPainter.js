@@ -225,7 +225,7 @@ define(function(require) {
         },
 
         end : function() {
-            this._elements.sort(this._eleDepthSortFunc);
+            // this._elements.sort(this._eleDepthSortFunc);
 
             var pathFillPrimitive;
             var pathStrokePrimitive;

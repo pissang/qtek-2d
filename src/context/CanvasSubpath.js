@@ -602,9 +602,9 @@ define(function(require) {
         }
     }
 
-    CanvasSubpath.prototype.staticize = function() {
-        this.basePolygon.staticize();
-        this.interiorPolygon.staticize();
+    CanvasSubpath.prototype.toStatic = function() {
+        this.basePolygon.toStatic();
+        this.interiorPolygon.toStatic();
 
         // Clear fill segements
         // PENDING
