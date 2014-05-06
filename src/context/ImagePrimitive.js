@@ -96,10 +96,16 @@ define(function(require) {
 
             for (var i = 0; i < this._images.length; i++) {
                 var image = this._images[i];
+                var z = image.depth;
                 var mat = image.transform._array;
                 var data = image.getVertices();
                 geo.attributes.position.value.set(data.position, offset3);
                 geo.attributes.texcoord.value.set(data.texcoord, offset2);
+
+                // Update z
+                for (var k = offset3 + 2; k < 18 + offset3; k += 3) {
+                    geo.attributes.position.value[k] = z;
+                }
 
                 for (var k = 0; k < 6; k++) {
                     // Set t0
