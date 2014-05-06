@@ -195,6 +195,7 @@ define(function(require) {
         },
 
         _disposeImageAtlas : function(imageAtlas) {
+            imageAtlas.clear();
             imageAtlas.dispose(this.ctx.renderer.gl);
         },
 

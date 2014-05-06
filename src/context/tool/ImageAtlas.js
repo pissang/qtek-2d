@@ -23,11 +23,15 @@ define(function(require) {
     ImageAtlas.prototype.clear = function() {
         this._canvas.width = BLOCK_SIZE * windowsDevicePixelRatio;
         this._canvas.height = BLOCK_SIZE * windowsDevicePixelRatio;
-        this._offsetX = this._offsetY = this._currentBlock = 0;
+        this._offsetX = this._offsetY = 0;
         this._nBlockSqrt = 1;
         this._ctx2d.clearRect(0, 0, this._canvas.width, this._canvas.height);
 
         this._ctx2d.scale(windowsDevicePixelRatio, windowsDevicePixelRatio);
+
+        if (this._texture) {
+            this._texture.dirty();
+        }
     }
 
     ImageAtlas.prototype.addText = function(text, type, tx, ty, maxWidth, _ctx) {
