@@ -325,7 +325,11 @@ define(function(require) {
             }
         },
         arcTo : function() {},
-        rect : function() {},
+        rect : function(x, y, w, h) {
+            if (this._path) {
+                this._path.rect(x, y, w, h, this.lineWidth);
+            }
+        },
         isPointInPath : function() {},
 
         /******************

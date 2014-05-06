@@ -1,0 +1,34 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8">
+    <script type="text/javascript" src="../../qtek/thirdparty/require.js"></script>
+    <script type="text/javascript" src="./js/config.js"></script>
+</head>
+<body>
+    <canvas id="main" style="position:absolute;left:0px;top:0px;"></canvas>
+    <script type="text/javascript">
+        require(['qtek/qtek',
+                'qtek-2d'], function(qtek, qtek2d){
+            var canvas = document.getElementById('main');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            var ctx = new qtek2d.context.Context2D({
+                canvas : canvas
+            });
+            var start = performance.now();
+            var painter = ctx.beginDraw();
+            ctx.beginPath();
+            ctx.lineWidth = 10;
+            ctx.fillStyle = 'red';
+            ctx.rect(100, 100, 200, 200);
+            ctx.lineTo(500, 500);
+            ctx.stroke();
+            ctx.fill();
+            ctx.endDraw();
+            console.log(performance.now() - start);
+        });
+    </script>
+</body>
+</html>

@@ -260,8 +260,12 @@ define(function(require) {
                 x2 = x3 + k * (y3 - y) * tanPhi;
                 y2 = y3 - k * (x3 - x) * tanPhi;
 
-                this._subpath.addCubicBezierCurve(x0, y0, x1, y1, x2, y2, x3, y3, thickness);
-                
+                var isClosed = this._subpath.addCubicBezierCurve(x0, y0, x1, y1, x2, y2, x3, y3, thickness);
+                if (isClosed) {
+                    // Close the current subpath and begin a new one
+                    this._endSubpath();
+                }
+
                 x0 = x3;
                 y0 = y3;
                 start = end;
@@ -273,6 +277,24 @@ define(function(require) {
 
         arcTo : function() {
 
+        },
+
+        rect : function(x, y, w, h, thickness) {
+            // Use a new subpath
+            this._endSubpath();
+            this._subpath = this._beginSubpath(x, y);
+
+            this._firstCmd = false;
+
+            this._subpath.addLine(x, y, x, y+h, thickness);
+            this._subpath.addLine(x, y+h, x+w, y+h, thickness);
+            this._subpath.addLine(x+w, y+h, x+w, y, thickness);
+            this._subpath.addLine(x+w, y, x, y, thickness);
+
+            this._xi = x;
+            this._yi = y;
+
+            this._endSubpath();
         },
 
         begin : function(ctx) {
