@@ -200,6 +200,9 @@ define(function(require) {
             if (!(mathTool.approxEqualInt(x0, this._xi) && mathTool.approxEqualInt(y0, this._yi))) {
                 this._subpath.addLine(this._xi, this._yi, x0, y0, thickness);
             }
+            if (r == 0) {
+                return;
+            }
             if (mathTool.approxEqual(startAngle, endAngle)) {
                 return;
             }
@@ -228,7 +231,7 @@ define(function(require) {
             // Simulate arc with bezier curve
             // "APPROXIMATION OF A CUBIC BEZIER CURVE BY CIRCULAR ARCS AND VICE VERSA"
             var tmp = endAngle - startAngle;
-            var nSeg = Math.ceil(Math.abs(tmp) / ARC_SEG_RADIAN * r / 100);
+            var nSeg = Math.ceil(Math.abs(tmp) / ARC_SEG_RADIAN * r / 50);
             if (nSeg < 4) {
                 nSeg = 4;
             }
@@ -299,7 +302,6 @@ define(function(require) {
 
         begin : function(ctx) {
             this.subpaths.clear();
-            this.depth = ctx.requestDepthChannel();
             this._subpath = null;
 
             this._stroke = this._fill = false;

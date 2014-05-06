@@ -360,6 +360,7 @@ define(function(require) {
                 if (this._painter) {
                     this._painter.end();
                 }
+                painter.ctx = this;
                 this._textAtlas = null;
                 this._painter = painter;
                 painter.begin();   
@@ -403,9 +404,25 @@ define(function(require) {
                 }
                 this._painter.end();
                 // Do thre draw ?
-                this._painter.draw(this);
+                this._painter.draw();
                 this._painter = null;
             }
+        },
+        repaint : function(painter) {
+            var els = painter.getElements();
+            var lastEl = els[els.length - 1];
+            if (lastEl) {
+                this.setDepthChannel(lastEl.depth);
+            }
+            painter.repaint();
+        },
+        draw : function(painter) {
+            var els = painter.getElements();
+            var lastEl = els[els.length - 1];
+            if (lastEl) {
+                this.setDepthChannel(lastEl.depth);
+            }
+            painter.draw();
         },
         // Force to end current path
         endPath : function() {
@@ -419,13 +436,16 @@ define(function(require) {
         },
         // Get current depth channel
         requestDepthChannel : function() {
-            this._depth += this.depthChannelGap;
+            this.setDepthChannel(this._depth + this.depthChannelGap);
+            return this._depth;
+        },
+        setDepthChannel : function(depth) {
+            this._depth = depth;
             if (this._depth > this.camera.far) {
                 this.camera.far *= 2;
                 this.camera.position.z = this.camera.far;
                 this.camera.update(true);
             }
-            return this._depth;
         },
         identity : function() {
             mat2d.identity(this.currentTransform._array);

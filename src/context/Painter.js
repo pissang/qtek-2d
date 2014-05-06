@@ -19,6 +19,8 @@ define(function(require) {
         return {
             transform : new Matrix2d(),
 
+            ctx : null,
+
             _elements : [],
 
             _primitives : [],
@@ -29,9 +31,7 @@ define(function(require) {
 
             _blending : true,
 
-            _blendFunc : null,
-
-            _gl : null
+            _blendFunc : null
         }
     }, function() {
         
@@ -51,11 +51,18 @@ define(function(require) {
     }, {
 
         addElement : function(el) {
+            el.depth = this.ctx.requestDepthChannel();
             this._elements.push(el);
         },
 
-        draw : function(ctx) {
-            var _gl = this._gl = ctx.renderer.gl;
+        getElements : function() {
+            return this._elements;
+        },
+
+        draw : function() {
+            var ctx = this.ctx;
+            var _gl = ctx.renderer.gl
+
             if (this._blending) {
                 _gl.enable(_gl.BLEND);
             } else {
@@ -80,12 +87,12 @@ define(function(require) {
             }
         },
 
-        repaint : function(ctx) {
+        repaint : function() {
             for (var i = 0; i < this._primitives.length; i++) {
                 this._primitives[i].updateElements();
             }
 
-            this.draw(ctx);
+            this.draw();
         },
 
         enableBlending : function() {
@@ -184,11 +191,11 @@ define(function(require) {
         },
 
         _disposePrimitive : function(primitive) {
-            primitive.geometry.dispose(this._gl);
+            primitive.geometry.dispose(this.ctx.renderer.gl);
         },
 
         _disposeImageAtlas : function(imageAtlas) {
-            imageAtlas.dispose(this._gl);
+            imageAtlas.dispose(this.ctx.renderer.gl);
         },
 
         _eleDepthSortFunc : function(a, b) {

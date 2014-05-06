@@ -76,7 +76,6 @@ define(function(require) {
         begin : function(){},
 
         end : function(ctx) {
-            this.depth = ctx.requestDepthChannel();
             Matrix2d.copy(this.transform, ctx.currentTransform);
 
             this.updateVertices();
