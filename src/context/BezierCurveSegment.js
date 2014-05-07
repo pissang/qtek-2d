@@ -246,15 +246,7 @@ define(function(require) {
             d2 = roundToZero(d2);
             d3 = roundToZero(d3);
 
-            if (this.forceConvex) {
-                if (!mathTool.isCCW(this.points)) {
-                    sign = -1;
-                } else {
-                    sign = 1;
-                }
-            } else {
-                sign = 1;
-            }
+            sign = 1;
             // Is a line
             if (d1 == 0 && d2 == 0 && d3 == 0) {
                 return;
@@ -377,7 +369,6 @@ define(function(require) {
                         mt_ms = mt - ms;
 
                         k1 = ls * ms;
-                        k1 = roundToZero(k1);
                         sign = (d1 > 0 && k1 < 0) || (d1 < 0 && k1 > 0) ? -sign : sign;
 
                         // cp0
