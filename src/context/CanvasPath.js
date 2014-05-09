@@ -267,6 +267,7 @@ define(function(require) {
                 if (isClosed) {
                     // Close the current subpath and begin a new one
                     this._endSubpath();
+                    break;
                 }
 
                 x0 = x3;

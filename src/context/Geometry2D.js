@@ -6,12 +6,19 @@ define(function(require) {
     var Geometry2D = Geometry.derive({
 
         _enabledAttributes : null,
+
+        _isDirty : true,
         
         hint : Geometry.DYNAMIC_DRAW
     }, {
 
         dirty : function() {
+            this._isDirty = true;
             this.cache.dirtyAll("chunks");
+        },
+
+        isDirty : function() {
+            return this._isDirty;
         },
 
         getVertexNumber : StaticGeometry.prototype.getVertexNumber,
