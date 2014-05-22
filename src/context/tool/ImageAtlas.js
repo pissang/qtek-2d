@@ -34,6 +34,7 @@ define(function(require) {
         }
     }
 
+    var pxRegex = /([0-9]+)px/;
     ImageAtlas.prototype.addText = function(text, type, tx, ty, maxWidth, _ctx) {
         var ctx = this._ctx2d;
         
