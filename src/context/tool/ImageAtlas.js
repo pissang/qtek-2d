@@ -49,8 +49,9 @@ define(function(require) {
             width = Math.min(width, maxWidth);
         }
         // http://stackoverflow.com/questions/1134586/how-can-you-find-the-height-of-text-on-an-html-canvas
-        // TODO rendering cn
-        var height = ctx.measureText('m').width;
+        // TODO Height!!!! rendering cn
+        // var height = ctx.measureText('m').width;
+        var height = Math.max(+pxRegex.exec(ctx.font)[1], ctx.measureText('m').width);
         var lineHeight = height * 1.5;
 
         if (width > this._canvas.width / windowsDevicePixelRatio) {

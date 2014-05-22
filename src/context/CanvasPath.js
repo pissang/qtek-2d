@@ -51,6 +51,8 @@ define(function(require) {
 
         this._fillColorChanged = true;
         this._strokeColorChanged = true;
+
+        this._isStatic = false;
     }
     CanvasPath.prototype = {
 
@@ -74,6 +76,10 @@ define(function(require) {
 
         setStrokeLineWidth : function(lineWidth) {
             if (!this._stroke) {
+                return;
+            }
+            if (this._isStatic) {
+                console.warn("Static path can't change its stroke line width");
                 return;
             }
 
@@ -306,6 +312,7 @@ define(function(require) {
             this._subpath = null;
 
             this._stroke = this._fill = false;
+            this._isStatic = false;
 
             this._firstCmd = true;
         },
@@ -589,6 +596,8 @@ define(function(require) {
             for (var i = 0; i < nSubpaths; i++) {
                 subpaths[i].toStatic();
             }
+
+            this._isStatic = true;
         },
 
         _endSubpath : function() {

@@ -606,10 +606,10 @@ define(function(require) {
         this.basePolygon.toStatic();
         this.interiorPolygon.toStatic();
 
-        // Clear fill segements
-        // PENDING
-        // fillCurveSegements and strokeSegements may still be used later
+        // Clear segements
         this.fillSegments.length = 0;
+        this.strokeSegments.length = 0;
+        this.fillCurveSegments.length = 0;
     }
 
 
