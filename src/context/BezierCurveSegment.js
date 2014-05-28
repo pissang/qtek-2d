@@ -6,7 +6,7 @@ define(function(require) {
     var vec2 = glMatrix.vec2;
     var mat4 = glMatrix.mat4;
 
-    var epsilon = 5e-4;
+    var epsilon = 5e-5;
 
     var GJKContext = require('./tool/GJK');
 
@@ -368,7 +368,7 @@ define(function(require) {
                         lt_ls = lt - ls;
                         mt_ms = mt - ms;
 
-                        k1 = ls * ms;
+                        k1 = roundToZero(ls * ms);
                         sign = (d1 > 0 && k1 < 0) || (d1 < 0 && k1 > 0) ? -sign : sign;
 
                         // cp0
