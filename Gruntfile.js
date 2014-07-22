@@ -10,7 +10,7 @@ module.exports = function(grunt){
     function makeRequirejsConfig(isAMD) {
         var common = {
             'baseUrl' : './src',
-            'name' : 'qtek/2d',
+            'name' : 'qtek-2d',
             'exclude' : ['text'],
             'paths' : {
                 'glmatrix' : '../../qtek/thirdparty/gl-matrix',
@@ -42,15 +42,24 @@ module.exports = function(grunt){
             common.out = 'dist/qtek-2d.amd.js';
             common.include = includeList;
             common.exclude.push('glmatrix');
+            common.exclude.push('qtek');
             common.packages = [{
-                name : 'qtek/2d',
+                name: 'qtek',
+                location: '../../qtek/src',
+                main: 'qtek.amd'
+            }, {
+                name : 'qtek-2d',
                 location : '.',
                 main : 'qtek-2d.amd'
             }]
         } else {
             common.out = 'dist/qtek-2d.js';
             common.packages = [{
-                name : 'qtek/2d',
+                name: 'qtek',
+                location: '../../qtek/src',
+                main: 'qtek.amd'
+            }, {
+                name : 'qtek-2d',
                 location : '.',
                 main : 'qtek-2d'
             }];
@@ -107,7 +116,7 @@ module.exports = function(grunt){
                 ) {
                     return;
                 }
-                includeList.push('qtek/2d/' + file.replace(/\.js$/, ''));
+                includeList.push('qtek-2d/' + file.replace(/\.js$/, ''));
             });
 
             grunt.task.run(['requirejs:amd', 'uglify:amd']);
