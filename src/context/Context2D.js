@@ -360,10 +360,14 @@ define(function(require) {
                 if (this._painter) {
                     this._painter.end();
                 }
+
+                // Always draw on the previus result
+                this.clearDepth();
+
                 painter.ctx = this;
                 this._textAtlas = null;
                 this._painter = painter;
-                painter.begin();   
+                painter.begin();
             }
         },
 
@@ -409,19 +413,13 @@ define(function(require) {
             }
         },
         repaint : function(painter) {
-            var els = painter.getElements();
-            var lastEl = els[els.length - 1];
-            if (lastEl) {
-                this.setDepthChannel(lastEl.depth);
-            }
+            // Always draw on the previus result
+            this.clearDepth();
             painter.repaint();
         },
         draw : function(painter) {
-            var els = painter.getElements();
-            var lastEl = els[els.length - 1];
-            if (lastEl) {
-                this.setDepthChannel(lastEl.depth);
-            }
+            // Always draw on the previus result
+            this.clearDepth();
             painter.draw();
         },
         // Force to end current path
