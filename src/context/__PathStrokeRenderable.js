@@ -11,7 +11,7 @@ define(function(require) {
     var CanvasElement = require('./CanvasElement');
     var LineSegment = require('./LineSegment');
     var BezierCurveSegment = require('./BezierCurveSegment');
-    var Primitive = require('./Primitive');
+    var Renderable2D = require('./Renderable2D');
     
     Shader.import(require('text!./shader/path.essl'));
 
@@ -20,7 +20,7 @@ define(function(require) {
         fragment : Shader.source('buildin.2d.path.stroke.fragment')
     });
 
-    var PathStrokePrimitive = Primitive.derive(function() {
+    var PathStrokeRenderable = Renderable2D.derive(function() {
         return {
             geometry : new Geometry2D({
                 attributes : {
@@ -244,7 +244,7 @@ define(function(require) {
         }
     });
 
-    CanvasElement.setStrokePrimitiveFactory(CanvasPath.eType, PathStrokePrimitive);
+    CanvasElement.setStrokeRenderableFactory(CanvasPath.eType, PathStrokeRenderable);
 
-    return PathStrokePrimitive;
+    return PathStrokeRenderable;
 });

@@ -16,8 +16,8 @@ define(function(require) {
     var CachedList = require('./tool/CachedList');
 
     var CanvasElement = require('./CanvasElement');
-    var PathPrimitive = require('./PathPrimitive');
-    var ImagePrimitive = require('./ImagePrimitive');
+    var PathRenderable = require('./PathRenderable');
+    var ImageRenderable = require('./ImageRenderable');
     var CanvasPath  = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
     var ImageAtlas = require('./tool/ImageAtlas');
@@ -46,15 +46,15 @@ define(function(require) {
 
             _elements : [],
 
-            _pathPrimitives : [],
+            _pathRenderables : [],
 
-            _imagePrimitives : [],
+            _imageRenderables : [],
 
             _textAtlas : new CachedList(ImageAtlas, 2),
 
-            _imagePrimitiveList: new CachedList(ImagePrimitive),
+            _imageRenderableList: new CachedList(ImageRenderable),
 
-            _pathPrimitiveList: new CachedList(PathPrimitive, 2),
+            _pathRenderableList: new CachedList(PathRenderable, 2),
 
             _pathColorTexture : null,
             _pathDepthTexture : null,
@@ -84,21 +84,21 @@ define(function(require) {
             _gl.depthMask(true);
             _gl.enable(_gl.BLEND);
 
-            for (var i = 0; i < this._pathPrimitives.length; i++) {
-                Matrix4.fromMat2d(this._pathPrimitives[i].worldTransform, this.transform);
-                this._pathPrimitives[i].material.blend = this._blendFunc;
+            for (var i = 0; i < this._pathRenderables.length; i++) {
+                Matrix4.fromMat2d(this._pathRenderables[i].worldTransform, this.transform);
+                this._pathRenderables[i].material.blend = this._blendFunc;
             }
-            for (var i = 0; i < this._imagePrimitives.length; i++) {
-                Matrix4.fromMat2d(this._imagePrimitives[i].worldTransform, this.transform);
-                this._imagePrimitives[i].material.blend = this._blendFunc;
+            for (var i = 0; i < this._imageRenderables.length; i++) {
+                Matrix4.fromMat2d(this._imageRenderables[i].worldTransform, this.transform);
+                this._imageRenderables[i].material.blend = this._blendFunc;
             }
 
-            if (this._pathPrimitives.length == 0 || this._imagePrimitives.length == 0) {
-                if (this._pathPrimitives.length > 0) {
-                    ctx.renderer.renderQueue(this._pathPrimitives, ctx.camera);
+            if (this._pathRenderables.length == 0 || this._imageRenderables.length == 0) {
+                if (this._pathRenderables.length > 0) {
+                    ctx.renderer.renderQueue(this._pathRenderables, ctx.camera);
                 }
-                if (this._imagePrimitives.length > 0) {
-                    ctx.renderer.renderQueue(this._imagePrimitives, ctx.camera);
+                if (this._imageRenderables.length > 0) {
+                    ctx.renderer.renderQueue(this._imageRenderables, ctx.camera);
                 }
             } else {
                 var useDepthTexture = glinfo.getExtension(_gl, 'WEBGL_depth_texture');
@@ -124,11 +124,11 @@ define(function(require) {
                 this.frameBuffer.bind(ctx.renderer);
 
                 _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
-                ctx.renderer.renderQueue(this._pathPrimitives, ctx.camera);
+                ctx.renderer.renderQueue(this._pathRenderables, ctx.camera);
                 if (!useDepthTexture) {
                     this.frameBuffer.attach(_gl, this._pathDepthTexture);
                     _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
-                    ctx.renderer.renderQueue(this._pathPrimitives, ctx.camera, depthMaterial);
+                    ctx.renderer.renderQueue(this._pathRenderables, ctx.camera, depthMaterial);
                 }
 
                 // Render image elemnts
@@ -137,12 +137,12 @@ define(function(require) {
                     this.frameBuffer.attach(_gl, this._imageDepthTexture, _gl.DEPTH_ATTACHMENT);
                 }
                 _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
-                ctx.renderer.renderQueue(this._imagePrimitives, ctx.camera);
+                ctx.renderer.renderQueue(this._imageRenderables, ctx.camera);
 
                 if (!useDepthTexture) {
                     this.frameBuffer.attach(_gl, this._imageDepthTexture);
                     _gl.clear(_gl.COLOR_BUFFER_BIT | _gl.DEPTH_BUFFER_BIT);
-                    ctx.renderer.renderQueue(this._imagePrimitives, ctx.camera, depthMaterial);
+                    ctx.renderer.renderQueue(this._imageRenderables, ctx.camera, depthMaterial);
                 }
 
                 this.frameBuffer.unbind(ctx.renderer);
@@ -194,11 +194,11 @@ define(function(require) {
         },
 
         repaint : function() {
-            for (var i = 0; i < this._pathPrimitives.length; i++) {
-                this._pathPrimitives[i].updateElements();
+            for (var i = 0; i < this._pathRenderables.length; i++) {
+                this._pathRenderables[i].updateElements();
             }
-            for (var i = 0; i < this._imagePrimitives.length; i++) {
-                this._imagePrimitives[i].updateElements();
+            for (var i = 0; i < this._imageRenderables.length; i++) {
+                this._imageRenderables[i].updateElements();
             }
 
             this.draw();
@@ -212,24 +212,24 @@ define(function(require) {
             
             this.beginTextAtlas();
 
-            for (var i = 0; i < this._pathPrimitives.length; i++) {
-                this._pathPrimitives[i].clearElements();
+            for (var i = 0; i < this._pathRenderables.length; i++) {
+                this._pathRenderables[i].clearElements();
             }
-            for (var i = 0; i < this._imagePrimitives.length; i++) {
-                this._imagePrimitives[i].clearElements();
+            for (var i = 0; i < this._imageRenderables.length; i++) {
+                this._imageRenderables[i].clearElements();
             }
-            this._pathPrimitives.length = 0;
+            this._pathRenderables.length = 0;
             this._elements.length = 0;
 
-            this._imagePrimitiveList.clear(this._disposePrimitive);
-            this._pathPrimitiveList.clear(this._disposePrimitive);
+            this._imageRenderableList.clear(this._disposeRenderable);
+            this._pathRenderableList.clear(this._disposeRenderable);
         },
 
         end : function() {
             // this._elements.sort(this._eleDepthSortFunc);
 
-            var pathPrimitive;
-            var imagePrimitive;
+            var pathRenderable;
+            var imageRenderable;
             var imageHashKey = null;
             for (var i = 0; i < this._elements.length; i++) {
                 var el = this._elements[i];
@@ -239,28 +239,28 @@ define(function(require) {
                         var key = el.getHashKey();
                         if (imageHashKey !== key) {
                             imageHashKey = key;
-                            imagePrimitive = this._imagePrimitiveList.increase();
-                            this._imagePrimitives.push(imagePrimitive);
+                            imageRenderable = this._imageRenderableList.increase();
+                            this._imageRenderables.push(imageRenderable);
                         }
-                        imagePrimitive.addElement(el);
+                        imageRenderable.addElement(el);
                         break;
                     case CanvasPath.eType:
-                        if (!pathPrimitive) {
-                            pathPrimitive = this._pathPrimitiveList.increase();
-                            this._pathPrimitives.push(pathPrimitive);
+                        if (!pathRenderable) {
+                            pathRenderable = this._pathRenderableList.increase();
+                            this._pathRenderables.push(pathRenderable);
                         }
-                        pathPrimitive.addElement(el);
+                        pathRenderable.addElement(el);
                         break;
                     default:
                         console.warn('Deferred painter only support CanvasImage and CanvasPath');
                 }
             }
 
-            for (var i = 0; i < this._pathPrimitives.length; i++) {
-                this._pathPrimitives[i].updateElements();
+            for (var i = 0; i < this._pathRenderables.length; i++) {
+                this._pathRenderables[i].updateElements();
             }
-            for (var i = 0; i < this._imagePrimitives.length; i++) {
-                this._imagePrimitives[i].updateElements();
+            for (var i = 0; i < this._imageRenderables.length; i++) {
+                this._imageRenderables[i].updateElements();
             }
         },
 
@@ -279,8 +279,8 @@ define(function(require) {
             this.begin();
         },
 
-        _disposePrimitive : function(primitive) {
-            primitive.geometry.dispose(this.ctx.renderer.gl);
+        _disposeRenderable : function(renderable) {
+            renderable.geometry.dispose(this.ctx.renderer.gl);
         },
 
         _disposeImageAtlas : function(imageAtlas) {

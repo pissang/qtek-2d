@@ -8,7 +8,7 @@ define(function(require) {
     var Geometry2D = require('./Geometry2D');
     var CanvasPath = require('./CanvasPath');
     var CanvasElement = require('./CanvasElement');
-    var Primitive = require('./Primitive');
+    var Renderable2D = require('./Renderable2D');
     
     Shader.import(require('text!./shader/path.essl'));
 
@@ -18,7 +18,7 @@ define(function(require) {
     });
     pathShader.define('fragment', 'ANTIALIASING');
 
-    var PathPrimitive = Primitive.derive(function() {
+    var PathRenderable = Renderable2D.derive(function() {
         return {
             geometry : new Geometry2D({
                 attributes : {
@@ -190,7 +190,7 @@ define(function(require) {
         }
     });
 
-    CanvasElement.setPrimitiveClass(CanvasPath.eType, PathPrimitive);
+    CanvasElement.setRenderableClass(CanvasPath.eType, PathRenderable);
 
-    return PathPrimitive;
+    return PathRenderable;
 });

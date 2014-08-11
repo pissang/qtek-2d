@@ -13,8 +13,7 @@ module.exports = function(grunt){
             'name' : 'qtek-2d',
             'exclude' : ['text'],
             'paths' : {
-                'glmatrix' : '../../qtek/thirdparty/gl-matrix',
-                'qtek' : '../../qtek/src'
+                'glmatrix' : '../../qtek/thirdparty/gl-matrix'
             },
             'optimize':"none",
             'onBuildWrite' : function(moduleName, path, content){
@@ -46,7 +45,7 @@ module.exports = function(grunt){
             common.packages = [{
                 name: 'qtek',
                 location: '../../qtek/src',
-                main: 'qtek.amd'
+                main: 'qtek'
             }, {
                 name : 'qtek-2d',
                 location : '.',

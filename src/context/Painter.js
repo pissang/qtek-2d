@@ -9,8 +9,8 @@ define(function(require) {
 
     var CachedList = require('./tool/CachedList');
     var CanvasElement = require('./CanvasElement');
-    var PathPrimitive = require('./PathPrimitive');
-    var ImagePrimitive = require('./ImagePrimitive');
+    var PathRenderable = require('./PathRenderable');
+    var ImageRenderable = require('./ImageRenderable');
     var CanvasPath  = require('./CanvasPath');
     var CanvasImage = require('./CanvasImage');
     var ImageAtlas = require('./tool/ImageAtlas');
@@ -23,9 +23,9 @@ define(function(require) {
 
             _elements : [],
 
-            _primitives : [],
+            _renderables : [],
 
-            _primitiveLists : [],
+            _renderableLists : [],
 
             _textAtlas : new CachedList(ImageAtlas, 2),
 
@@ -38,15 +38,15 @@ define(function(require) {
         var nFactory = CanvasElement.getClassNumber();
 
         for (var i = 0; i < nFactory; i++) {
-            var Primitive = CanvasElement.getPrimitiveClass(i);
-            if (Primitive) {
-                this._primitiveLists.push(new CachedList(Primitive, 5));
+            var Renderable = CanvasElement.getRenderableClass(i);
+            if (Renderable) {
+                this._renderableLists.push(new CachedList(Renderable, 5));
             } else {
-                this._primitiveLists.push(null);
+                this._renderableLists.push(null);
             }
         } 
 
-        this._disposePrimitive = this._disposePrimitive.bind(this);
+        this._disposeRenderable = this._disposeRenderable.bind(this);
         this._disposeImageAtlas = this._disposeImageAtlas.bind(this);
     }, {
 
@@ -69,17 +69,17 @@ define(function(require) {
                 _gl.disable(_gl.BLEND);
             }
 
-            for (var i = 0; i < this._primitives.length; i++) {
-                Matrix4.fromMat2d(this._primitives[i].worldTransform, this.transform);
+            for (var i = 0; i < this._renderables.length; i++) {
+                Matrix4.fromMat2d(this._renderables[i].worldTransform, this.transform);
 
                 if (this._blending && this._blendFunc) {
-                    this._primitives[i].material.blend = this._blendFunc;
+                    this._renderables[i].material.blend = this._blendFunc;
                 } else {
-                    this._primitives[i].material.blend = null;
+                    this._renderables[i].material.blend = null;
                 }
             }
 
-            ctx.renderer.renderQueue(this._primitives, ctx.camera);
+            ctx.renderer.renderQueue(this._renderables, ctx.camera);
 
             // FRESH all elements after draw
             for (var i = 0; i < this._elements.length; i++) {
@@ -88,8 +88,8 @@ define(function(require) {
         },
 
         repaint : function() {
-            for (var i = 0; i < this._primitives.length; i++) {
-                this._primitives[i].updateElements();
+            for (var i = 0; i < this._renderables.length; i++) {
+                this._renderables[i].updateElements();
             }
 
             this.draw();
@@ -111,14 +111,14 @@ define(function(require) {
 
             this.beginTextAtlas();
 
-            for (var i = 0; i < this._primitives.length; i++) {
-                this._primitives[i].clearElements();
+            for (var i = 0; i < this._renderables.length; i++) {
+                this._renderables[i].clearElements();
             }
-            this._primitives.length = 0;
+            this._renderables.length = 0;
             this._elements.length = 0;
-            for (var i = 0; i < this._primitiveLists.length; i++) {
-                if (this._primitiveLists[i]) {
-                    this._primitiveLists[i].clear(this._disposePrimitive);
+            for (var i = 0; i < this._renderableLists.length; i++) {
+                if (this._renderableLists[i]) {
+                    this._renderableLists[i].clear(this._disposeRenderable);
                 }
             }
         },
@@ -127,46 +127,46 @@ define(function(require) {
             if (this._blending) {
                 // this._elements.sort(this._eleDepthSortFunc);
                 var hashKey = null;
-                var primitive;
+                var renderable;
                 for (var i = 0; i < this._elements.length; i++) {
                     var el = this._elements[i];
                     var elHashKey = el.getHashKey();
                     if (el.getHashKey() != hashKey) {
-                        // Begin a new primitive
-                        var list = this._primitiveLists[el.eType];
+                        // Begin a new renderable
+                        var list = this._renderableLists[el.eType];
                         if (list) {
-                            primitive = list.increase();
-                            primitive.clearElements();   
+                            renderable = list.increase();
+                            renderable.clearElements();   
                         }
-                        if (primitive) {
-                            this._primitives.push(primitive);
+                        if (renderable) {
+                            this._renderables.push(renderable);
                         }
 
                         hashKey = elHashKey;
                     }
-                    if (primitive) {
-                        primitive.addElement(el);
+                    if (renderable) {
+                        renderable.addElement(el);
                     }
                 }
-                for (var i = 0; i < this._primitives.length; i++) {
-                    this._primitives[i].updateElements();
+                for (var i = 0; i < this._renderables.length; i++) {
+                    this._renderables[i].updateElements();
                 }
             } else {
                 // TODO
-                for (var i = 0; i < this._primitiveLists.length; i++) {
-                    if (this._primitiveLists[i]) {
-                        var primitive = this._primitiveLists[i].increase();
-                        primitive.clearElements();
-                        this._primitives.push(primitive);
+                for (var i = 0; i < this._renderableLists.length; i++) {
+                    if (this._renderableLists[i]) {
+                        var renderable = this._renderableLists[i].increase();
+                        renderable.clearElements();
+                        this._renderables.push(renderable);
                     }
                 }
                 for (var i = 0; i < this._elements.length; i++) {
                     var el = this._elements[i];
-                    var primitive = this._primitiveLists[el.eType].get(0);
-                    primitive.addElement(el);
+                    var renderable = this._renderableLists[el.eType].get(0);
+                    renderable.addElement(el);
                 }
-                for (var i = 0; i < this._primitives.length; i++) {
-                    this._primitives[i].updateElements(true);
+                for (var i = 0; i < this._renderables.length; i++) {
+                    this._renderables[i].updateElements(true);
                 }
             }
         },
@@ -190,8 +190,8 @@ define(function(require) {
             this.begin();
         },
 
-        _disposePrimitive : function(primitive) {
-            primitive.geometry.dispose(this.ctx.renderer.gl);
+        _disposeRenderable : function(renderable) {
+            renderable.geometry.dispose(this.ctx.renderer.gl);
         },
 
         _disposeImageAtlas : function(imageAtlas) {

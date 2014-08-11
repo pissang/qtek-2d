@@ -8,7 +8,7 @@ define(function(require) {
     var Geometry2D = require('./Geometry2D');
     var CanvasImage = require('./CanvasImage');
     var CanvasElement = require('./CanvasElement');
-    var Primitive = require('./Primitive');
+    var Renderable2D = require('./Renderable2D');
 
     var glMatrix = require('glmatrix');
     var vec2 = glMatrix.vec2;
@@ -21,7 +21,7 @@ define(function(require) {
     });
     imageShader.enableTexture('sprite');
 
-    var ImagePrimitive = Primitive.derive(function() {
+    var ImageRenderable = Renderable2D.derive(function() {
         return {
             geometry : new Geometry2D({
                 attributes : {
@@ -130,7 +130,7 @@ define(function(require) {
         }
     });
 
-    CanvasElement.setPrimitiveClass(CanvasImage.eType, ImagePrimitive);
+    CanvasElement.setRenderableClass(CanvasImage.eType, ImageRenderable);
 
-    return ImagePrimitive;
+    return ImageRenderable;
 })

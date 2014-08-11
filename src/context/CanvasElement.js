@@ -5,23 +5,23 @@ define(function(require) {
     };
 
     var canvasElementMustImplementsMethods = ['hasFill', 'hasStroke', 'getHashKey', 'updateVertices', 'afterDraw'];
-    var primitiveMustImplementsMethods = ['updateElements', 'addElement', 'clearElements'];
+    var renderableMustImplementsMethods = ['updateElements', 'addElement', 'clearElements'];
 
     CanvasElement._factories = [];
     var _factories = CanvasElement._factories;
 
-    CanvasElement.register = function(elClass, primClass) {
+    CanvasElement.register = function(elClass, renderableClass) {
         if (elClass && !CanvasElement._checkElementClass(elClass)) {
             return;
         }
-        if (primClass && !CanvasElement._checkPrimitiveClass(primClass)) {
+        if (renderableClass && !CanvasElement._checkRenderableClass(renderableClass)) {
             return;
         }
 
         var eType = _factories.length;
         _factories.push({
             fElement : elClass,
-            fPrimitive : primClass
+            fRenderable : renderableClass
         });
 
         return eType;
@@ -39,11 +39,11 @@ define(function(require) {
         return result;
     }
 
-    CanvasElement._checkPrimitiveClass = function(primClass) {
+    CanvasElement._checkRenderableClass = function(renderableClass) {
         var result = true;
-        for (var i = 0; i < primitiveMustImplementsMethods.length; i++) {
-            var name = primitiveMustImplementsMethods[i];
-            if (typeof(primClass.prototype[name]) == 'undefined') {
+        for (var i = 0; i < renderableMustImplementsMethods.length; i++) {
+            var name = renderableMustImplementsMethods[i];
+            if (typeof(renderableClass.prototype[name]) == 'undefined') {
                 console.warn(name + ' method must be implemented in Element');
                 result = false;
             }
@@ -51,13 +51,13 @@ define(function(require) {
         return result;
     }
 
-    CanvasElement.setPrimitiveClass = function(eType, primClass) {
-        if (!CanvasElement._checkPrimitiveClass(primClass)) {
+    CanvasElement.setRenderableClass = function(eType, renderableClass) {
+        if (!CanvasElement._checkRenderableClass(renderableClass)) {
             return;
         }
         var item = _factories[eType]
         if (item) {
-            item.fPrimitive = primClass;
+            item.fRenderable = renderableClass;
         }
     }
     
@@ -71,10 +71,10 @@ define(function(require) {
         }
     }
 
-    CanvasElement.getPrimitiveClass = function(eType) {
+    CanvasElement.getRenderableClass = function(eType) {
         var item = _factories[eType];
         if (item) {
-            return item.fPrimitive;
+            return item.fRenderable;
         }
     }
 
@@ -92,10 +92,10 @@ define(function(require) {
         }
     }
 
-    CanvasElement.createPrimitive = function(eType) {
+    CanvasElement.createRenderable = function(eType) {
         var item = _factories[eType];
         if (item) {
-            return new item.fPrimitive();
+            return new item.fRenderable();
         }
     }
 

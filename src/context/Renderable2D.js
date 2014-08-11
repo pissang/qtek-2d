@@ -7,7 +7,7 @@ define(function(require) {
     var Material = require('qtek/Material');
     var Shader = require('qtek/Shader');
 
-    var Primitive = Renderable.derive({
+    var Renderable2D = Renderable.derive({
 
         culling : false,
 
@@ -21,5 +21,5 @@ define(function(require) {
         render : Renderable.prototype.render
     });
 
-    return Primitive;
+    return Renderable2D;
 });
