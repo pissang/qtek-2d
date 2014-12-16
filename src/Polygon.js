@@ -114,7 +114,7 @@ define(function (require) {
     }
 
     Polygon.prototype.checkClose = function(x, y) {
-        if (this._nPoints >= 1 && mathTool.approxEqualInt(x, this._x0) && mathTool.approxEqualInt(y, this._y0)) {
+        if (this._nPoints >= 1 && mathTool.approxEqual(x, this._x0) && mathTool.approxEqual(y, this._y0)) {
             this._isClosed = true;
             return true;
         }
@@ -170,7 +170,6 @@ define(function (require) {
         if (bbox[0][0] > x || bbox[1][0] < x || bbox[0][1] > y || bbox[1][1] < y) {
             return false;
         }
-
     }
 
     Polygon.prototype.toStatic = function() {

@@ -183,7 +183,7 @@ define(function(require) {
         },
 
         endTextAtlas : function() {
-
+            
         },
 
         dispose : function() {
