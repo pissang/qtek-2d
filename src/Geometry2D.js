@@ -7,7 +7,9 @@ define(function(require) {
 
         _enabledAttributes : null,
 
-        hint : Geometry.DYNAMIC_DRAW
+        dynamic: true,
+
+        hint: Geometry.STATIC_DRAW
     }, {
 
         dirty : function() {
