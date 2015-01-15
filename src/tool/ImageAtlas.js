@@ -17,6 +17,8 @@ define(function(require) {
 
         this._texture = null;
 
+        this._rowHeight = 0;
+
         // document.body.appendChild(this._canvas);
     }
 
@@ -61,12 +63,15 @@ define(function(require) {
 
         if (sx + width > this._canvas.width / windowsDevicePixelRatio) {
             sx = 0;
-            if (sy + lineHeight > this._canvas.height / windowsDevicePixelRatio) {
+            if (sy + this._rowHeight > this._canvas.height / windowsDevicePixelRatio) {
                 return null;
             } else {
-                sy += lineHeight;
+                sy += this._rowHeight;
+                this._rowHeight = 0;
             }
         }
+
+        this._rowHeight = Math.max(lineHeight, this._rowHeight);
 
         this._offsetY = sy;
         this._offsetX = sx + width;

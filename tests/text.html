@@ -22,7 +22,11 @@
 
             ctx.font = "20px Helvetica";
             ctx.textBaseline = 'top';
-            ctx.fillText('测试', 10, 10);
+            for (var i = 0; i < 20; i++) {
+                for (var j = 0; j < 20; j++) {
+                    ctx.fillText('测试', i * 40, j * 30);
+                }
+            }
             ctx.endDraw();
             console.log(performance.now() - start);
         });
