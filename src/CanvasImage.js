@@ -1,6 +1,6 @@
 define(function(require) {
 
-    var Texture2D = require('qtek/texture/Texture2D');
+    var Texture2D = require('qtek/Texture2D');
     var Matrix2d = require('qtek/math/Matrix2d');
     var CanvasElement = require('./CanvasElement');
     var glMatrix = require('glmatrix');

@@ -9,7 +9,7 @@ define(function(require) {
     var Pass = require('qtek/compositor/Pass');
     var FrameBuffer = require('qtek/FrameBuffer');
     var glinfo = require('qtek/core/glinfo');
-    var Texture2D = require('qtek/texture/Texture2D');
+    var Texture2D = require('qtek/Texture2D');
     var Matrix2d = require('qtek/math/Matrix2d');
     var Matrix4 = require('qtek/math/Matrix4');
 
