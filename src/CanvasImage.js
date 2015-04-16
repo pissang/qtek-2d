@@ -3,7 +3,7 @@ define(function(require) {
     var Texture2D = require('qtek/Texture2D');
     var Matrix2d = require('qtek/math/Matrix2d');
     var CanvasElement = require('./CanvasElement');
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var vec2 = glMatrix.vec2;
 
     var _textureCache = [];

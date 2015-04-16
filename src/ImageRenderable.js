@@ -10,7 +10,7 @@ define(function(require) {
     var CanvasElement = require('./CanvasElement');
     var Renderable2D = require('./Renderable2D');
 
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var vec2 = glMatrix.vec2;
 
     Shader.import(require('text!./shader/image.essl'));

@@ -3,7 +3,7 @@ define(function(require) {
     'use strict'
     
     var Matrix2d = require('qtek/math/Matrix2d');
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var vec2 = glMatrix.vec2;
     var mat2d = glMatrix.mat2d;
 
@@ -450,8 +450,8 @@ define(function(require) {
         },
         resize: function(width, height) {
             this.renderer.resize(width, height);
-            width = this.renderer.width;
-            height = this.renderer.height;
+            width = this.renderer.getWidth();
+            height = this.renderer.getHeight();
 
             this.camera.left = -width / 2;
             this.camera.right = width / 2;

@@ -5,7 +5,6 @@ define( function(require){
 	"CanvasElement": require('qtek-2d/CanvasElement'),
 	"CanvasImage": require('qtek-2d/CanvasImage'),
 	"CanvasPath": require('qtek-2d/CanvasPath'),
-	"CanvasPointCloud": require('qtek-2d/CanvasPointCloud'),
 	"CanvasSubpath": require('qtek-2d/CanvasSubpath'),
 	"Context2D": require('qtek-2d/Context2D'),
 	"DeferredPainter": require('qtek-2d/DeferredPainter'),

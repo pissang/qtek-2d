@@ -9,7 +9,7 @@ define(function(require) {
 
     var Polygon = require('./Polygon');
 
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var vec3 = glMatrix.vec3;
     var vec2 = glMatrix.vec2;
     var mat4 = glMatrix.mat4;

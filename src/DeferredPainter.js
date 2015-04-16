@@ -176,16 +176,16 @@ define(function(require) {
         _checkTexture : function(texture, ctx) {
             if (
                 !texture 
-                || texture.width !== ctx.renderer.width
-                || texture.height !== ctx.renderer.height
+                || texture.width !== ctx.renderer.getWidth()
+                || texture.height !== ctx.renderer.getHeight()
             ) {
                 if (texture) {
                     texture.dispose(ctx.renderer.gl);
                 }
 
                 texture = new Texture2D({
-                    width : ctx.renderer.width,
-                    height : ctx.renderer.height,
+                    width : ctx.renderer.getWidth(),
+                    height : ctx.renderer.getHeight(),
                     minFilter : ctx.renderer.gl.NEAREST,
                     magFilter : ctx.renderer.gl.NEAREST
                 });

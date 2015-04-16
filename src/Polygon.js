@@ -1,7 +1,7 @@
 define(function (require) {
 
     var mathTool = require('./tool/math');
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var vec2 = glMatrix.vec2;
 
     var TriangulationTool = require('./tool/Triangulation2');

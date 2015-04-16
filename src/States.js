@@ -1,6 +1,6 @@
 define(function (require) {
      
-    var glMatrix = require('glmatrix');
+    var glMatrix = require('qtek/dep/glmatrix');
     var mat2d = glMatrix.mat2d;
 
     var States = function() {
